@@ -1,0 +1,28 @@
+{
+  "name": "athlisis-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "type-check": "turbo run type-check",
+    "db:migrate": "cd packages/database && npx prisma migrate dev",
+    "db:studio": "cd packages/database && npx prisma studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "turbo": "^2.9.16",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@10.9.7",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "description": "Athlisis \u2014 AI-Powered Wellness Practice Management"
+}
