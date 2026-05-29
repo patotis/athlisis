@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Ρυθμίσεις</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#080c14;--bg2:#0d1220;--bg3:#111827;
+    --surface:rgba(255,255,255,.03);--surface2:rgba(255,255,255,.06);
+    --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+    --text:#f0f4ff;--text2:#8892a4;--text3:#4a5568;
+    --accent:#3b82f6;--accent2:#6366f1;--accent3:#06b6d4;
+    --green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+    --font-d:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+  .topbar{display:flex;align-items:center;gap:14px;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
+  .tb-title{font-family:var(--font-d);font-size:15px;font-weight:600;flex:1}
+  .btn-primary{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.3)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-sec{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;font-family:var(--font-d);font-weight:500;cursor:pointer;transition:all .15s}
+  .btn-sec:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+  .btn-danger{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.06);color:var(--red);font-size:13px;font-family:var(--font-d);font-weight:500;cursor:pointer;transition:all .15s}
+  .btn-danger:hover{background:rgba(239,68,68,.1)}
+
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 57px)}
+
+  /* SETTINGS NAV */
+  .settings-nav{border-right:1px solid var(--border);background:var(--bg2);padding:20px 12px}
+  .sn-section{margin-bottom:20px}
+  .sn-label{font-size:10px;font-family:var(--font-d);font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:0 12px;margin-bottom:6px}
+  .sn-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--text2);font-size:13px;margin-bottom:1px}
+  .sn-item:hover{background:var(--surface2);color:var(--text)}
+  .sn-item.active{background:rgba(59,130,246,.1);color:var(--accent);border:1px solid rgba(59,130,246,.15)}
+  .sn-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+  .sn-item.active .sn-icon{opacity:1}
+  .sn-badge{margin-left:auto;font-size:9.5px;font-family:var(--font-d);font-weight:700;padding:2px 6px;border-radius:10px;background:var(--accent);color:white}
+
+  /* CONTENT */
+  .settings-content{padding:28px;overflow-y:auto;max-width:780px}
+
+  /* SECTION HEADER */
+  .sec-header{margin-bottom:24px}
+  .sec-title{font-family:var(--font-d);font-size:18px;font-weight:800;margin-bottom:4px}
+  .sec-sub{font-size:13px;color:var(--text2)}
+
+  /* CARD */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px;transition:border-color .2s}
+  .card:hover{border-color:var(--border2)}
+  .card-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+  .card-title-action{font-size:11.5px;color:var(--accent);cursor:pointer;font-weight:500}
+
+  /* FORM */
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+  .field-label{font-size:12px;font-family:var(--font-d);font-weight:600;color:var(--text2)}
+  .field-hint{font-size:11px;color:var(--text3);margin-top:3px}
+  input[type="text"],input[type="email"],input[type="url"],input[type="tel"],input[type="password"],select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font-b);font-size:13px;outline:none;transition:all .2s;width:100%}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+  select option{background:#1a2035}
+  textarea{resize:vertical;min-height:80px;line-height:1.6}
+
+  /* AVATAR UPLOAD */
+  .avatar-upload{display:flex;align-items:center;gap:20px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:16px}
+  .avatar-preview{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:22px;font-weight:800;color:white;flex-shrink:0}
+  .avatar-info{flex:1}
+  .avatar-name{font-size:14px;font-weight:600;margin-bottom:4px}
+  .avatar-hint{font-size:11.5px;color:var(--text2)}
+
+  /* TOGGLE */
+  .toggle-row{display:flex;align-items:flex-start;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
+  .toggle-row:last-child{border-bottom:none}
+  .toggle-info{flex:1;padding-right:20px}
+  .toggle-label{font-size:13.5px;font-weight:500;margin-bottom:3px}
+  .toggle-hint{font-size:12px;color:var(--text2);line-height:1.5}
+  .toggle{width:40px;height:22px;border-radius:11px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;position:relative;transition:all .25s;flex-shrink:0;margin-top:2px}
+  .toggle.on{background:var(--green);border-color:var(--green)}
+  .toggle-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:left .25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+  .toggle.on .toggle-knob{left:20px}
+
+  /* COLOR SWATCH */
+  .color-swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .swatch{width:32px;height:32px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .15s}
+  .swatch:hover,.swatch.selected{border-color:white;transform:scale(1.1)}
+
+  /* INTEGRATION CARDS */
+  .integration-card{display:flex;align-items:center;gap:16px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;transition:all .15s}
+  .integration-card:hover{background:var(--surface2);border-color:var(--border2)}
+  .int-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .int-info{flex:1}
+  .int-name{font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .int-desc{font-size:12px;color:var(--text2)}
+  .int-status{font-size:11px;font-family:var(--font-d);font-weight:700;padding:4px 10px;border-radius:20px;flex-shrink:0}
+  .int-connected{background:rgba(16,185,129,.12);color:var(--green)}
+  .int-disconnected{background:var(--surface2);color:var(--text3)}
+
+  /* DANGER ZONE */
+  .danger-card{background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.15);border-radius:12px;padding:20px;margin-bottom:16px}
+  .danger-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px}
+  .danger-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(239,68,68,.1)}
+  .danger-row:last-child{border-bottom:none;padding-bottom:0}
+  .danger-label{font-size:13px;font-weight:500;margin-bottom:3px}
+  .danger-hint{font-size:12px;color:var(--text2)}
+
+  /* PLAN BADGE */
+  .plan-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(99,102,241,.1));border:1px solid rgba(99,102,241,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-family:var(--font-d);font-weight:700;color:var(--accent2)}
+
+  /* DIVIDER */
+  .divider{height:1px;background:var(--border);margin:20px 0}
+
+  /* TAB PANELS */
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  /* NOTIFICATION CHANNEL */
+  .channel-card{display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
+  .ch-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .ch-info{flex:1}
+  .ch-name{font-size:13px;font-weight:500;margin-bottom:2px}
+  .ch-status{font-size:11.5px;color:var(--text2)}
+
+  @media(max-width:700px){.layout{grid-template-columns:1fr}.settings-nav{display:none}.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-title">Ρυθμίσεις</div>
+  <div style="display:flex;gap:8px">
+    <button class="btn-sec" onclick="resetChanges()">Αναίρεση</button>
+    <button class="btn-primary" onclick="saveSettings()">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l5 5 9-9"/></svg>
+      Αποθήκευση
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SETTINGS NAV -->
+  <div class="settings-nav">
+    <div class="sn-section">
+      <div class="sn-label">Λογαριασμός</div>
+      <div class="sn-item active" onclick="showPanel(this,'profile')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3.5"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6"/></svg>
+        Προφίλ
+      </div>
+      <div class="sn-item" onclick="showPanel(this,'practice')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="14" height="10" rx="2"/><path d="M7 7V5a3 3 0 016 0v2"/></svg>
+        Πράκτορας / Κλινική
+      </div>
+      <div class="sn-item" onclick="showPanel(this,'security')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V5l7-3z"/></svg>
+        Ασφάλεια
+      </div>
+    </div>
+    <div class="sn-section">
+      <div class="sn-label">Πλατφόρμα</div>
+      <div class="sn-item" onclick="showPanel(this,'branding')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 3"/></svg>
+        Branding
+      </div>
+      <div class="sn-item" onclick="showPanel(this,'notifications')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2a6 6 0 00-6 6c0 4-2 5-2 5h16s-2-1-2-5a6 6 0 00-6-6zM7.5 17a2.5 2.5 0 005 0"/></svg>
+        Ειδοποιήσεις
+        <span class="sn-badge">3</span>
+      </div>
+      <div class="sn-item" onclick="showPanel(this,'calendar')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M7 2v4M13 2v4M3 9h14"/></svg>
+        Ημερολόγιο
+      </div>
+      <div class="sn-item" onclick="showPanel(this,'integrations')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V9l-6-6z"/><path d="M13 3v5h5"/></svg>
+        Ενσωματώσεις
+      </div>
+    </div>
+    <div class="sn-section">
+      <div class="sn-label">Χρέωση</div>
+      <div class="sn-item" onclick="showPanel(this,'billing')">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="11" rx="2"/><path d="M2 9h16"/></svg>
+        Συνδρομή
+      </div>
+    </div>
+    <div class="sn-section">
+      <div class="sn-label">Επικίνδυνη Ζώνη</div>
+      <div class="sn-item" onclick="showPanel(this,'danger')" style="color:var(--red)">
+        <svg class="sn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--red)"><path d="M10 2l8 14H2L10 2z"/><path d="M10 9v4"/><circle cx="10" cy="14.5" r=".5" fill="currentColor"/></svg>
+        Επικίνδυνη Ζώνη
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="settings-content">
+
+    <!-- PROFILE -->
+    <div class="tab-panel active" id="panel-profile">
+      <div class="sec-header">
+        <div class="sec-title">Προφίλ Επαγγελματία</div>
+        <div class="sec-sub">Οι πληροφορίες σου εμφανίζονται στους πελάτες σου.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Φωτογραφία Προφίλ</div>
+        <div class="avatar-upload">
+          <div class="avatar-preview">ΔΚ</div>
+          <div class="avatar-info">
+            <div class="avatar-name">Δρ. Κωνσταντίνου</div>
+            <div class="avatar-hint">JPG, PNG ή WebP · Μέγιστο 5MB · Προτεινόμενο 400×400px</div>
+          </div>
+          <button class="btn-sec" style="font-size:12px;padding:7px 14px">Αλλαγή</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Προσωπικά Στοιχεία</div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Όνομα</div>
+            <input type="text" value="Κωνσταντίνα">
+          </div>
+          <div class="field">
+            <div class="field-label">Επώνυμο</div>
+            <input type="text" value="Δημητρίου">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Email</div>
+            <input type="email" value="k.dimitriou@athlisis.com">
+          </div>
+          <div class="field">
+            <div class="field-label">Τηλέφωνο</div>
+            <input type="tel" value="+30 694 123 4567">
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Ειδικότητα</div>
+          <select>
+            <option selected>Κλινική Διαιτολόγος</option>
+            <option>Διατροφολόγος</option>
+            <option>Personal Trainer</option>
+            <option>Φυσιοθεραπευτής</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label">Βιογραφικό</div>
+          <textarea>Κλινική Διαιτολόγος με 8 χρόνια εμπειρία. Ειδίκευση στη διαχείριση σακχαρώδους διαβήτη τύπου 2, καρδιαγγειακών νοσημάτων και απώλειας βάρους. Απόφοιτος Χαροκοπείου Πανεπιστημίου.</textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Αριθμός Άδειας Ασκήσεως</div>
+            <input type="text" placeholder="ΔΔ-12345">
+            <div class="field-hint">Εμφανίζεται σε PDF εξαγωγές</div>
+          </div>
+          <div class="field">
+            <div class="field-label">Γλώσσα</div>
+            <select>
+              <option selected>Ελληνικά</option>
+              <option>English</option>
+              <option>Deutsch</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRACTICE -->
+    <div class="tab-panel" id="panel-practice">
+      <div class="sec-header">
+        <div class="sec-title">Πράκτορας / Κλινική</div>
+        <div class="sec-sub">Στοιχεία της επιχείρησής σου για invoices και PDF εξαγωγές.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Στοιχεία Επιχείρησης</div>
+        <div class="field">
+          <div class="field-label">Επωνυμία</div>
+          <input type="text" value="Δημητρίου Nutrition Clinic">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">ΑΦΜ</div>
+            <input type="text" placeholder="123456789">
+          </div>
+          <div class="field">
+            <div class="field-label">ΔΟΥ</div>
+            <input type="text" placeholder="ΔΟΥ Αθηνών">
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Διεύθυνση</div>
+          <input type="text" placeholder="Λεωφόρος Κηφισίας 123, Αθήνα 115 24">
+        </div>
+        <div class="field">
+          <div class="field-label">Website</div>
+          <input type="url" placeholder="https://yoursite.gr">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ρυθμίσεις Ραντεβού</div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Διάρκεια ραντεβού (λεπτά)</div>
+            <select>
+              <option>30</option>
+              <option selected>45</option>
+              <option>60</option>
+              <option>90</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">Υπενθύμιση πριν (ώρες)</div>
+            <select>
+              <option>1</option>
+              <option selected>24</option>
+              <option>48</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Αυτόματη κράτηση από πελάτες</div>
+              <div class="toggle-hint">Οι πελάτες μπορούν να κλείνουν ραντεβού μόνοι τους</div>
+            </div>
+            <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Έγκριση ραντεβού</div>
+              <div class="toggle-hint">Κάθε νέο ραντεβού χρειάζεται τη δική σου έγκριση</div>
+            </div>
+            <div class="toggle" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="tab-panel" id="panel-security">
+      <div class="sec-header">
+        <div class="sec-title">Ασφάλεια Λογαριασμού</div>
+        <div class="sec-sub">Διαχείριση κωδικού, MFA και συνδεδεμένων συσκευών.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Αλλαγή Κωδικού</div>
+        <div class="field">
+          <div class="field-label">Τρέχων Κωδικός</div>
+          <input type="password" placeholder="••••••••">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Νέος Κωδικός</div>
+            <input type="password" placeholder="Τουλάχιστον 8 χαρακτήρες">
+          </div>
+          <div class="field">
+            <div class="field-label">Επιβεβαίωση</div>
+            <input type="password" placeholder="Επανάληψη νέου κωδικού">
+          </div>
+        </div>
+        <button class="btn-sec" style="font-size:12.5px">Ενημέρωση Κωδικού</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Έλεγχος Ταυτότητας 2 Παραγόντων (MFA)</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Authenticator App (TOTP)</div>
+              <div class="toggle-hint">Google Authenticator, Authy, 1Password</div>
+            </div>
+            <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">SMS Verification</div>
+              <div class="toggle-hint">+30 694 *** **67</div>
+            </div>
+            <div class="toggle" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ενεργές Συνεδρίες</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px">
+            <span style="font-size:20px">💻</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:500">Chrome · macOS · Αθήνα, GR</div>
+              <div style="font-size:11.5px;color:var(--accent)">Τρέχουσα συνεδρία</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <span style="font-size:20px">📱</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:500">iPhone 15 · iOS 18</div>
+              <div style="font-size:11.5px;color:var(--text2)">Τελευταία χρήση: 2 ώρες πριν</div>
+            </div>
+            <button class="btn-danger" style="font-size:11px;padding:5px 10px">Αποσύνδεση</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRANDING -->
+    <div class="tab-panel" id="panel-branding">
+      <div class="sec-header">
+        <div class="sec-title">Branding & Εμφάνιση</div>
+        <div class="sec-sub">Προσαρμογή χρωμάτων και λογοτύπου για PDF εξαγωγές.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Λογότυπο</div>
+        <div style="display:flex;align-items:center;gap:16px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
+          <div style="width:80px;height:80px;background:var(--bg3);border:2px dashed var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer">🏥</div>
+          <div>
+            <div style="font-size:13px;font-weight:500;margin-bottom:4px">Ανέβασε λογότυπο</div>
+            <div style="font-size:12px;color:var(--text2)">PNG ή SVG · Διαφανές φόντο · 200×200px+</div>
+            <button class="btn-sec" style="font-size:11.5px;padding:6px 12px;margin-top:8px">Επιλογή αρχείου</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Χρώματα Brand</div>
+        <div class="field">
+          <div class="field-label">Κύριο Χρώμα</div>
+          <div class="color-swatches">
+            <div class="swatch selected" style="background:#3b82f6"></div>
+            <div class="swatch" style="background:#6366f1"></div>
+            <div class="swatch" style="background:#10b981"></div>
+            <div class="swatch" style="background:#f59e0b"></div>
+            <div class="swatch" style="background:#ef4444"></div>
+            <div class="swatch" style="background:#8b5cf6"></div>
+            <div class="swatch" style="background:#06b6d4"></div>
+            <div class="swatch" style="background:#ec4899"></div>
+            <div class="swatch" style="background:linear-gradient(135deg,#1a1a1a,#333);border:1px solid var(--border2)" title="Custom">+</div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <div class="field-label">Hex Color</div>
+          <input type="text" value="#3b82f6" style="max-width:160px">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">PDF Footer</div>
+        <div class="field">
+          <div class="field-label">Κείμενο footer σε εξαγωγές</div>
+          <textarea rows="2">Δημητρίου Nutrition Clinic · k.dimitriou@clinic.com · +30 694 123 4567</textarea>
+          <div class="field-hint">Εμφανίζεται στο κάτω μέρος κάθε PDF εξαγωγής</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="tab-panel" id="panel-notifications">
+      <div class="sec-header">
+        <div class="sec-title">Ειδοποιήσεις</div>
+        <div class="sec-sub">Επέλεξε πότε και πώς θέλεις να ειδοποιείσαι.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Κανάλια Ειδοποιήσεων</div>
+        <div class="channel-card">
+          <div class="ch-icon" style="background:rgba(59,130,246,.1)">📧</div>
+          <div class="ch-info">
+            <div class="ch-name">Email</div>
+            <div class="ch-status">k.dimitriou@clinic.com · Επαληθευμένο ✓</div>
+          </div>
+          <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="channel-card">
+          <div class="ch-icon" style="background:rgba(16,185,129,.1)">📱</div>
+          <div class="ch-info">
+            <div class="ch-name">Push Notifications</div>
+            <div class="ch-status">iPhone 15 · Ενεργό</div>
+          </div>
+          <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="channel-card">
+          <div class="ch-icon" style="background:rgba(37,211,102,.1)">💬</div>
+          <div class="ch-info">
+            <div class="ch-name">WhatsApp</div>
+            <div class="ch-status">Μη ρυθμισμένο · Απαιτεί σύνδεση</div>
+          </div>
+          <div class="toggle" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="channel-card">
+          <div class="ch-icon" style="background:rgba(245,158,11,.1)">📟</div>
+          <div class="ch-info">
+            <div class="ch-name">SMS</div>
+            <div class="ch-status">+30 694 *** **67 · Ανενεργό</div>
+          </div>
+          <div class="toggle" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Τύποι Ειδοποιήσεων</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Νέο μήνυμα από πελάτη</div>
+              <div class="toggle-hint">Push + Email όταν ένας πελάτης σου στείλει μήνυμα</div>
+            </div>
+            <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Υπενθύμιση ραντεβού</div>
+              <div class="toggle-hint">24 ώρες πριν κάθε ραντεβού</div>
+            </div>
+            <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">AI Insights & Churn Alerts</div>
+              <div class="toggle-hint">Όταν το AI εντοπίσει πελάτη σε κίνδυνο αποχώρησης</div>
+            </div>
+            <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Ανανέωση πλάνου</div>
+              <div class="toggle-hint">3 μέρες πριν λήξει πλάνο πελάτη</div>
+            </div>
+            <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Νέος πελάτης εγγραφή</div>
+              <div class="toggle-hint">Όταν νέος πελάτης κάνει εγγραφή μέσω του link σου</div>
+            </div>
+            <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Εβδομαδιαία αναφορά</div>
+              <div class="toggle-hint">Κάθε Δευτέρα πρωί — summary εβδομάδας</div>
+            </div>
+            <div class="toggle" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="tab-panel" id="panel-calendar">
+      <div class="sec-header">
+        <div class="sec-title">Ρυθμίσεις Ημερολογίου</div>
+        <div class="sec-sub">Διαθεσιμότητα, συγχρονισμός και online κράτηση.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ώρες Διαθεσιμότητας</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:12px;font-family:var(--font-d);font-weight:600;color:var(--text3)">ΗΜΕΡΑ</div>
+            <div style="font-size:12px;font-family:var(--font-d);font-weight:600;color:var(--text3)">ΑΠΟ</div>
+            <div style="font-size:12px;font-family:var(--font-d);font-weight:600;color:var(--text3)">ΕΩΣ</div>
+            <div style="font-size:12px;font-family:var(--font-d);font-weight:600;color:var(--text3)">ΕΝΕΡΓΟ</div>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:10px;align-items:center">
+            <div style="font-size:13px">Δευτέρα</div>
+            <select style="padding:6px 10px;font-size:12.5px"><option>09:00</option><option selected>09:00</option></select>
+            <select style="padding:6px 10px;font-size:12.5px"><option selected>18:00</option></select>
+            <div class="toggle on" onclick="toggleSwitch(this)" style="margin:0 auto"><div class="toggle-knob"></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:10px;align-items:center">
+            <div style="font-size:13px">Τρίτη</div>
+            <select style="padding:6px 10px;font-size:12.5px"><option selected>09:00</option></select>
+            <select style="padding:6px 10px;font-size:12.5px"><option selected>18:00</option></select>
+            <div class="toggle on" onclick="toggleSwitch(this)" style="margin:0 auto"><div class="toggle-knob"></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:10px;align-items:center">
+            <div style="font-size:13px">Τετάρτη</div>
+            <select style="padding:6px 10px;font-size:12.5px"><option selected>10:00</option></select>
+            <select style="padding:6px 10px;font-size:12.5px"><option selected>16:00</option></select>
+            <div class="toggle on" onclick="toggleSwitch(this)" style="margin:0 auto"><div class="toggle-knob"></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:10px;align-items:center;opacity:.5">
+            <div style="font-size:13px">Σάββατο</div>
+            <select style="padding:6px 10px;font-size:12.5px" disabled><option>10:00</option></select>
+            <select style="padding:6px 10px;font-size:12.5px" disabled><option>14:00</option></select>
+            <div class="toggle" onclick="toggleSwitch(this)" style="margin:0 auto"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTEGRATIONS -->
+    <div class="tab-panel" id="panel-integrations">
+      <div class="sec-header">
+        <div class="sec-title">Ενσωματώσεις</div>
+        <div class="sec-sub">Σύνδεσε εξωτερικές υπηρεσίες με το Athlisis.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Βίντεο & Επικοινωνία</div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:#e3f2fd">🎥</div>
+          <div class="int-info">
+            <div class="int-name">Zoom</div>
+            <div class="int-desc">Αυτόματη δημιουργία meeting links σε κάθε ραντεβού</div>
+          </div>
+          <span class="int-status int-connected">✓ Συνδεδεμένο</span>
+        </div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:#e8f5e9">📅</div>
+          <div class="int-info">
+            <div class="int-name">Google Calendar</div>
+            <div class="int-desc">Συγχρονισμός ραντεβού αμφίδρομα</div>
+          </div>
+          <span class="int-status int-connected">✓ Συνδεδεμένο</span>
+        </div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:rgba(255,255,255,.05)">💬</div>
+          <div class="int-info">
+            <div class="int-name">WhatsApp Business</div>
+            <div class="int-desc">Αυτόματα follow-ups και υπενθυμίσεις μέσω WhatsApp</div>
+          </div>
+          <button class="btn-sec" style="font-size:11.5px;padding:6px 12px;flex-shrink:0">Σύνδεση</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Υγεία & Wearables</div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:rgba(255,255,255,.05)">❤️</div>
+          <div class="int-info">
+            <div class="int-name">Apple Health</div>
+            <div class="int-desc">Συγχρονισμός βάρους, βημάτων και δραστηριότητας από iPhone</div>
+          </div>
+          <button class="btn-sec" style="font-size:11.5px;padding:6px 12px;flex-shrink:0">Σύνδεση</button>
+        </div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:#e3f2fd">⌚</div>
+          <div class="int-info">
+            <div class="int-name">Garmin Connect</div>
+            <div class="int-desc">Δεδομένα προπόνησης και ύπνου από Garmin wearables</div>
+          </div>
+          <button class="btn-sec" style="font-size:11.5px;padding:6px 12px;flex-shrink:0">Σύνδεση</button>
+        </div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:rgba(16,185,129,.1)">💪</div>
+          <div class="int-info">
+            <div class="int-name">Fitbit</div>
+            <div class="int-desc">Calories burned, heart rate, και sleep data</div>
+          </div>
+          <button class="btn-sec" style="font-size:11.5px;padding:6px 12px;flex-shrink:0">Σύνδεση</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Πληρωμές</div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:rgba(99,102,241,.1)">💳</div>
+          <div class="int-info">
+            <div class="int-name">Stripe</div>
+            <div class="int-desc">Συνδρομές, invoices και πληρωμές πελατών</div>
+          </div>
+          <span class="int-status int-connected">✓ Συνδεδεμένο</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Αποθήκευση Δεδομένων</div>
+        <div class="integration-card">
+          <div class="int-icon" style="background:rgba(245,158,11,.1)">☁️</div>
+          <div class="int-info">
+            <div class="int-name">Google Drive</div>
+            <div class="int-desc">Αυτόματη δημιουργία αντιγράφων ασφαλείας PDF εξαγωγών</div>
+          </div>
+          <button class="btn-sec" style="font-size:11.5px;padding:6px 12px;flex-shrink:0">Σύνδεση</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILLING (quick link) -->
+    <div class="tab-panel" id="panel-billing">
+      <div class="sec-header">
+        <div class="sec-title">Συνδρομή & Χρέωση</div>
+        <div class="sec-sub">Διαχείριση του πλάνου σου.</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-size:16px;font-weight:700;font-family:var(--font-d);margin-bottom:4px">Professional Plan</div>
+            <div style="font-size:13px;color:var(--text2)">€49/μήνα · Ανανεώνεται 28 Ιουνίου 2026</div>
+          </div>
+          <div class="plan-badge">✦ Ενεργό</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-sec">Ιστορικό Τιμολογίων</button>
+          <button class="btn-primary" onclick="window.location.href='billing.html'">Διαχείριση Συνδρομής →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="tab-panel" id="panel-danger">
+      <div class="sec-header">
+        <div class="sec-title">Επικίνδυνη Ζώνη</div>
+        <div class="sec-sub">Αυτές οι ενέργειες είναι μη αναστρέψιμες. Προχώρησε με προσοχή.</div>
+      </div>
+      <div class="danger-card">
+        <div class="danger-title">⚠️ Επικίνδυνες Ενέργειες</div>
+        <div class="danger-row">
+          <div>
+            <div class="danger-label">Εξαγωγή Δεδομένων (GDPR)</div>
+            <div class="danger-hint">Κατέβασε όλα τα δεδομένα σου σε μορφή JSON/CSV</div>
+          </div>
+          <button class="btn-sec" style="font-size:12px;padding:7px 14px;flex-shrink:0">Εξαγωγή</button>
+        </div>
+        <div class="danger-row">
+          <div>
+            <div class="danger-label">Διαγραφή Όλων των Δεδομένων Πελατών</div>
+            <div class="danger-hint">Μη αναστρέψιμη ενέργεια — διαγράφει όλα τα δεδομένα πελατών</div>
+          </div>
+          <button class="btn-danger" style="flex-shrink:0" onclick="confirmDelete('clients')">Διαγραφή</button>
+        </div>
+        <div class="danger-row">
+          <div>
+            <div class="danger-label">Διαγραφή Λογαριασμού</div>
+            <div class="danger-hint">Μόνιμη διαγραφή λογαριασμού και όλων των δεδομένων. Δεν μπορεί να αναιρεθεί.</div>
+          </div>
+          <button class="btn-danger" style="flex-shrink:0" onclick="confirmDelete('account')">Διαγραφή Λογαριασμού</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showPanel(el, id) {
+  document.querySelectorAll('.sn-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+function toggleSwitch(el) {
+  el.classList.toggle('on');
+}
+
+function saveSettings() {
+  const btn = event.target.closest('button');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l5 5 9-9"/></svg> Αποθηκεύτηκε!';
+  btn.style.background = 'linear-gradient(135deg, var(--green), #34d399)';
+  setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2500);
+}
+
+function resetChanges() { if(confirm('Αναίρεση όλων των αλλαγών;')) location.reload(); }
+
+function confirmDelete(type) {
+  const msg = type === 'account'
+    ? 'ΠΡΟΣΟΧΗ: Αυτή η ενέργεια είναι μη αναστρέψιμη!\n\nΓράψε "ΔΙΑΓΡΑΦΗ" για επιβεβαίωση:'
+    : 'Είσαι σίγουρος; Θα διαγραφούν όλα τα δεδομένα πελατών.';
+  const input = type === 'account' ? prompt(msg) : confirm(msg);
+  if (type === 'account' && input === 'ΔΙΑΓΡΑΦΗ') alert('Ο λογαριασμός θα διαγραφεί εντός 24 ωρών.');
+}
+
+document.querySelectorAll('.swatch').forEach(s => {
+  s.addEventListener('click', function() {
+    document.querySelectorAll('.swatch').forEach(x => x.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

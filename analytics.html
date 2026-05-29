@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#080c14; --bg2:#0d1220; --bg3:#111827;
+    --surface:rgba(255,255,255,.03); --surface2:rgba(255,255,255,.06);
+    --border:rgba(255,255,255,.07); --border2:rgba(255,255,255,.13);
+    --text:#f0f4ff; --text2:#8892a4; --text3:#4a5568;
+    --accent:#3b82f6; --accent2:#6366f1; --accent3:#06b6d4;
+    --green:#10b981; --orange:#f59e0b; --red:#ef4444; --purple:#8b5cf6;
+    --font-d:'Syne',sans-serif; --font-s:'Instrument Serif',serif; --font-b:'DM Sans',sans-serif;
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh}
+  ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+  .topbar{display:flex;align-items:center;gap:14px;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
+  .tb-title{font-family:var(--font-d);font-size:15px;font-weight:600;flex:1}
+  .btn-sec{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12.5px;font-family:var(--font-d);font-weight:500;cursor:pointer;transition:all .15s}
+  .btn-sec:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+  .btn-primary{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.3)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(59,130,246,.4)}
+
+  .period-tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px}
+  .ptab{padding:5px 14px;border-radius:6px;font-size:12px;font-family:var(--font-d);font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s}
+  .ptab.active{background:var(--bg3);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+  .content{padding:24px 28px;max-width:1600px;margin:0 auto}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+  .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+  .grid-2b{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  .grid-3b{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .2s;animation:fadeUp .35s ease both}
+  .card:hover{border-color:var(--border2)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.12s}.card:nth-child(4){animation-delay:.16s}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .card-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text2)}
+  .card-action{font-size:11.5px;color:var(--accent);cursor:pointer}
+
+  /* KPI CARDS */
+  .kpi-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:16px}
+  .kpi-val{font-family:var(--font-d);font-size:30px;font-weight:800;line-height:1;margin-bottom:4px}
+  .kpi-label{font-size:12px;color:var(--text2);margin-bottom:8px}
+  .kpi-delta{font-size:11.5px;display:flex;align-items:center;gap:5px}
+  .delta-up{color:var(--green)} .delta-dn{color:var(--red)} .delta-neu{color:var(--text3)}
+
+  /* SVG CHARTS */
+  .chart-svg{width:100%;overflow:visible}
+
+  /* BAR CHART */
+  .bar-chart{display:flex;align-items:flex-end;gap:6px;height:140px;padding:0 2px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+  .bar-fill{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(to top,var(--accent),var(--accent2));opacity:.6;transition:all .3s;cursor:pointer;position:relative}
+  .bar-fill:hover{opacity:1;transform:scaleX(1.05)}
+  .bar-fill.current{opacity:1;box-shadow:0 -4px 16px rgba(59,130,246,.5)}
+  .bar-label{font-size:9.5px;color:var(--text3);font-family:var(--font-d);font-weight:600}
+  .bar-val{font-size:9px;color:var(--text2)}
+
+  /* DONUT */
+  .donut-wrap{display:flex;align-items:center;gap:20px}
+  .donut-legend{display:flex;flex-direction:column;gap:8px;flex:1}
+  .dl-row{display:flex;align-items:center;gap:8px;font-size:12px}
+  .dl-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+  .dl-label{color:var(--text2);flex:1}
+  .dl-val{font-family:var(--font-d);font-weight:700;font-size:13px}
+
+  /* LINE CHART */
+  .line-chart-wrap{position:relative;margin-top:8px}
+
+  /* RETENTION TABLE */
+  .ret-grid{display:flex;flex-direction:column;gap:0}
+  .ret-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .ret-row:last-child{border-bottom:none}
+  .ret-month{font-size:12px;color:var(--text2);width:60px;flex-shrink:0}
+  .ret-bar-wrap{flex:1}
+  .ret-bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+  .ret-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),#34d399);transition:width 1s ease}
+  .ret-pct{font-family:var(--font-d);font-size:12px;font-weight:700;width:40px;text-align:right;flex-shrink:0}
+  .ret-clients{font-size:11px;color:var(--text3);width:60px;text-align:right;flex-shrink:0}
+
+  /* TOP CLIENTS TABLE */
+  .client-table{display:flex;flex-direction:column;gap:0}
+  .ct-header{display:grid;grid-template-columns:1fr 80px 80px 70px;gap:8px;padding:6px 0;font-size:10.5px;font-family:var(--font-d);font-weight:600;color:var(--text3);border-bottom:1px solid var(--border)}
+  .ct-row{display:grid;grid-template-columns:1fr 80px 80px 70px;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:all .15s}
+  .ct-row:last-child{border-bottom:none}
+  .ct-row:hover{background:var(--surface);padding-left:8px;margin:0 -8px;border-radius:6px}
+  .ct-name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px}
+  .ct-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;font-family:var(--font-d);flex-shrink:0}
+  .ct-val{font-size:13px;font-family:var(--font-d);font-weight:600}
+  .ct-badge{font-size:10.5px;font-family:var(--font-d);font-weight:600;padding:2px 8px;border-radius:20px}
+
+  /* CHURN RISK */
+  .churn-list{display:flex;flex-direction:column;gap:8px}
+  .churn-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid;cursor:pointer;transition:all .15s}
+  .churn-high{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)}
+  .churn-med{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2)}
+  .churn-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:var(--font-d);flex-shrink:0}
+  .churn-info{flex:1}
+  .churn-name{font-size:13px;font-weight:500;margin-bottom:2px}
+  .churn-reason{font-size:11px;color:var(--text2)}
+  .churn-score{font-family:var(--font-d);font-size:14px;font-weight:800}
+
+  /* AI USAGE */
+  .ai-usage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .au-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+  .au-val{font-family:var(--font-d);font-size:22px;font-weight:800;margin-bottom:4px}
+  .au-label{font-size:10.5px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+  /* PROGRESS */
+  .prog-row{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+  .prog-hdr{display:flex;justify-content:space-between;font-size:12px}
+  .prog-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;border-radius:3px;transition:width 1s ease}
+
+  /* SECTION LABEL */
+  .slabel{font-family:var(--font-d);font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;margin-top:8px}
+
+  /* GOAL PROGRESS */
+  .goal-arc{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .goal-arc-val{font-family:var(--font-d);font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .goal-arc-label{font-size:11px;color:var(--text3);text-align:center}
+
+  @media(max-width:1100px){.grid-4{grid-template-columns:1fr 1fr}.grid-3,.grid-3b{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){.grid-4,.grid-3,.grid-2,.grid-2b,.grid-3b{grid-template-columns:1fr}.content{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-title">Analytics & Αναφορές</div>
+  <div class="period-tabs">
+    <div class="ptab" onclick="setPeriod(this)">7 μέρες</div>
+    <div class="ptab active" onclick="setPeriod(this)">30 μέρες</div>
+    <div class="ptab" onclick="setPeriod(this)">3 μήνες</div>
+    <div class="ptab" onclick="setPeriod(this)">12 μήνες</div>
+  </div>
+  <button class="btn-sec">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l3-3m0 0l3 3m-3-3v8M4 4h16M4 8h10"/></svg>
+    Export PDF
+  </button>
+  <button class="btn-primary">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l4 12 3-6 6-3L4 4z"/></svg>
+    AI Ανάλυση
+  </button>
+</div>
+
+<div class="content">
+
+  <!-- KPI ROW -->
+  <div class="slabel">Βασικοί Δείκτες — Μάιος 2026</div>
+  <div class="grid-4">
+    <div class="card">
+      <div class="kpi-icon" style="background:rgba(59,130,246,.1)">💰</div>
+      <div class="kpi-val" style="color:var(--accent)">€4,920</div>
+      <div class="kpi-label">Έσοδα Μήνα</div>
+      <div class="kpi-delta delta-up">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5l7 7M3 12l7-7"/></svg>
+        +18% vs Απρίλιος (€4,170)
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi-icon" style="background:rgba(16,185,129,.1)">👥</div>
+      <div class="kpi-val" style="color:var(--green)">28</div>
+      <div class="kpi-label">Ενεργοί Πελάτες</div>
+      <div class="kpi-delta delta-up">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5l7 7M3 12l7-7"/></svg>
+        +4 νέοι αυτό το μήνα
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi-icon" style="background:rgba(99,102,241,.1)">📊</div>
+      <div class="kpi-val" style="color:var(--accent2)">87%</div>
+      <div class="kpi-label">Μέση Συμμόρφωση</div>
+      <div class="kpi-delta delta-up">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5l7 7M3 12l7-7"/></svg>
+        +5% από προηγούμενο μήνα
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi-icon" style="background:rgba(245,158,11,.1)">🔄</div>
+      <div class="kpi-val" style="color:var(--orange)">92%</div>
+      <div class="kpi-label">Ποσοστό Διατήρησης</div>
+      <div class="kpi-delta delta-up">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5l7 7M3 12l7-7"/></svg>
+        Μόνο 2 ακυρώσεις μήνα
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE + CLIENTS -->
+  <div class="grid-2">
+
+    <!-- REVENUE CHART -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Έσοδα (12 Μήνες)</span>
+        <div style="display:flex;gap:12px">
+          <span style="font-size:11px;color:var(--text2)">Σύνολο 2026: <strong style="color:var(--green)">€24,840</strong></span>
+          <span style="font-size:11px;color:var(--text2)">Στόχος: <strong style="color:var(--accent)">€60,000</strong></span>
+        </div>
+      </div>
+      <div class="bar-chart" id="revenueChart">
+        <!-- Generated by JS -->
+      </div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div style="text-align:center;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div style="font-family:var(--font-d);font-size:16px;font-weight:800;color:var(--green)">€175</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Μέσος / Πελάτη</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div style="font-family:var(--font-d);font-size:16px;font-weight:800;color:var(--accent)">€2,100</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Μέσος LTV</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div style="font-family:var(--font-d);font-size:16px;font-weight:800;color:var(--orange)">€410</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Νέα Έσοδα Μήνα</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENT GROWTH + DONUT -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <!-- DONUT: Service Mix -->
+      <div class="card" style="flex:1">
+        <div class="card-header"><span class="card-title">Κατανομή Υπηρεσιών</span></div>
+        <div class="donut-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <!-- Donut segments -->
+            <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="18"/>
+            <!-- Dietitian 46% -->
+            <circle cx="50" cy="50" r="36" fill="none" stroke="#3b82f6" stroke-width="18" stroke-dasharray="103 227" stroke-dashoffset="0" transform="rotate(-90 50 50)" opacity=".8"/>
+            <!-- Nutrition 28% -->
+            <circle cx="50" cy="50" r="36" fill="none" stroke="#6366f1" stroke-width="18" stroke-dasharray="63 267" stroke-dashoffset="-103" transform="rotate(-90 50 50)" opacity=".8"/>
+            <!-- PT 16% -->
+            <circle cx="50" cy="50" r="36" fill="none" stroke="#10b981" stroke-width="18" stroke-dasharray="36 294" stroke-dashoffset="-166" transform="rotate(-90 50 50)" opacity=".8"/>
+            <!-- Other 10% -->
+            <circle cx="50" cy="50" r="36" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="22 308" stroke-dashoffset="-202" transform="rotate(-90 50 50)" opacity=".8"/>
+            <text x="50" y="54" text-anchor="middle" fill="white" font-size="13" font-family="Syne" font-weight="800">28</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="dl-row"><div class="dl-dot" style="background:#3b82f6"></div><span class="dl-label">Διαιτολογία</span><span class="dl-val" style="color:#3b82f6">46%</span></div>
+            <div class="dl-row"><div class="dl-dot" style="background:#6366f1"></div><span class="dl-label">Διατροφολογία</span><span class="dl-val" style="color:#6366f1">28%</span></div>
+            <div class="dl-row"><div class="dl-dot" style="background:#10b981"></div><span class="dl-label">Personal Training</span><span class="dl-val" style="color:#10b981">16%</span></div>
+            <div class="dl-row"><div class="dl-dot" style="background:#f59e0b"></div><span class="dl-label">Άλλα</span><span class="dl-val" style="color:#f59e0b">10%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK GOALS -->
+      <div class="card" style="flex:1">
+        <div class="card-header"><span class="card-title">Στόχοι Μήνα</span></div>
+        <div class="prog-row">
+          <div class="prog-hdr"><span style="color:var(--text2)">Νέοι Πελάτες</span><span style="color:var(--green);font-weight:600">4 / 5</span></div>
+          <div class="prog-track"><div class="prog-fill" style="width:80%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-hdr"><span style="color:var(--text2)">Έσοδα</span><span style="color:var(--accent);font-weight:600">€4,920 / €5,000</span></div>
+          <div class="prog-track"><div class="prog-fill" style="width:98%;background:linear-gradient(90deg,var(--accent),#60a5fa)"></div></div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-hdr"><span style="color:var(--text2)">AI Πλάνα</span><span style="color:var(--accent2);font-weight:600">28 / 30</span></div>
+          <div class="prog-track"><div class="prog-fill" style="width:93%;background:linear-gradient(90deg,var(--accent2),#818cf8)"></div></div>
+        </div>
+        <div class="prog-row" style="margin-bottom:0">
+          <div class="prog-hdr"><span style="color:var(--text2)">Ραντεβού</span><span style="color:var(--orange);font-weight:600">42 / 50</span></div>
+          <div class="prog-track"><div class="prog-fill" style="width:84%;background:linear-gradient(90deg,var(--orange),#fbbf24)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETENTION + ADHERENCE -->
+  <div class="grid-2b">
+
+    <!-- RETENTION -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Διατήρηση Πελατών (6 Μήνες)</span>
+        <span style="font-family:var(--font-d);font-size:18px;font-weight:800;color:var(--green)">92%</span>
+      </div>
+      <div class="ret-grid">
+        <div class="ret-row">
+          <span class="ret-month">Δεκ '25</span>
+          <div class="ret-bar-wrap"><div class="ret-bar-track"><div class="ret-bar-fill" style="width:88%"></div></div></div>
+          <span class="ret-pct" style="color:var(--green)">88%</span>
+          <span class="ret-clients">22 πελ.</span>
+        </div>
+        <div class="ret-row">
+          <span class="ret-month">Ιαν '26</span>
+          <div class="ret-bar-wrap"><div class="ret-bar-track"><div class="ret-bar-fill" style="width:85%"></div></div></div>
+          <span class="ret-pct" style="color:var(--green)">85%</span>
+          <span class="ret-clients">23 πελ.</span>
+        </div>
+        <div class="ret-row">
+          <span class="ret-month">Φεβ '26</span>
+          <div class="ret-bar-wrap"><div class="ret-bar-track"><div class="ret-bar-fill" style="width:89%"></div></div></div>
+          <span class="ret-pct" style="color:var(--green)">89%</span>
+          <span class="ret-clients">24 πελ.</span>
+        </div>
+        <div class="ret-row">
+          <span class="ret-month">Μαρ '26</span>
+          <div class="ret-bar-wrap"><div class="ret-bar-track"><div class="ret-bar-fill" style="width:90%"></div></div></div>
+          <span class="ret-pct" style="color:var(--green)">90%</span>
+          <span class="ret-clients">25 πελ.</span>
+        </div>
+        <div class="ret-row">
+          <span class="ret-month">Απρ '26</span>
+          <div class="ret-bar-wrap"><div class="ret-bar-track"><div class="ret-bar-fill" style="width:91%"></div></div></div>
+          <span class="ret-pct" style="color:var(--green)">91%</span>
+          <span class="ret-clients">26 πελ.</span>
+        </div>
+        <div class="ret-row">
+          <span class="ret-month">Μαι '26</span>
+          <div class="ret-bar-wrap"><div class="ret-bar-track"><div class="ret-bar-fill" style="width:92%;background:linear-gradient(90deg,var(--accent3),#22d3ee)"></div></div></div>
+          <span class="ret-pct" style="color:var(--accent3)">92%</span>
+          <span class="ret-clients" style="color:var(--text)">28 πελ.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADHERENCE BREAKDOWN -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Συμμόρφωση ανά Τύπο Πλάνου</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span style="color:var(--text2)">Μεσογειακή</span><div style="display:flex;align-items:center;gap:6px"><span style="color:var(--green);font-weight:700">94%</span><span style="font-size:10px;color:var(--text3)">11 πελ.</span></div></div>
+          <div class="prog-track"><div class="prog-fill" style="width:94%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span style="color:var(--text2)">Keto</span><div style="display:flex;align-items:center;gap:6px"><span style="color:var(--accent);font-weight:700">88%</span><span style="font-size:10px;color:var(--text3)">5 πελ.</span></div></div>
+          <div class="prog-track"><div class="prog-fill" style="width:88%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span style="color:var(--text2)">Diabetic / ΣΔ2</span><div style="display:flex;align-items:center;gap:6px"><span style="color:var(--purple);font-weight:700">91%</span><span style="font-size:10px;color:var(--text3)">4 πελ.</span></div></div>
+          <div class="prog-track"><div class="prog-fill" style="width:91%;background:linear-gradient(90deg,var(--purple),#a78bfa)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span style="color:var(--text2)">Intermittent Fasting</span><div style="display:flex;align-items:center;gap:6px"><span style="color:var(--accent3);font-weight:700">82%</span><span style="font-size:10px;color:var(--text3)">4 πελ.</span></div></div>
+          <div class="prog-track"><div class="prog-fill" style="width:82%;background:linear-gradient(90deg,var(--accent3),#22d3ee)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span style="color:var(--text2)">Vegan Αθλητικό</span><div style="display:flex;align-items:center;gap:6px"><span style="color:var(--orange);font-weight:700">76%</span><span style="font-size:10px;color:var(--text3)">4 πελ.</span></div></div>
+          <div class="prog-track"><div class="prog-fill" style="width:76%;background:linear-gradient(90deg,var(--orange),#fbbf24)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP CLIENTS + CHURN -->
+  <div class="grid-2">
+    <!-- TOP CLIENTS -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Top Πελάτες — Συμμόρφωση</span><span class="card-action">Όλοι →</span></div>
+      <div class="client-table">
+        <div class="ct-header"><span>Πελάτης</span><span>Συμμ.</span><span>Διάρκεια</span><span>Αξία</span></div>
+        <div class="ct-row">
+          <div class="ct-name"><div class="ct-av" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">ΜΠ</div>Μαρία Παπαδοπούλου</div>
+          <div class="ct-val" style="color:var(--green)">94%</div>
+          <div style="font-size:12px;color:var(--text2)">3 μήνες</div>
+          <span class="ct-badge" style="background:rgba(16,185,129,.12);color:var(--green)">€525</span>
+        </div>
+        <div class="ct-row">
+          <div class="ct-name"><div class="ct-av" style="background:linear-gradient(135deg,#10b981,#06b6d4)">ΑΚ</div>Αλέξανδρος Κωστόπουλος</div>
+          <div class="ct-val" style="color:var(--green)">91%</div>
+          <div style="font-size:12px;color:var(--text2)">1 μήνας</div>
+          <span class="ct-badge" style="background:rgba(59,130,246,.12);color:var(--accent)">€175</span>
+        </div>
+        <div class="ct-row">
+          <div class="ct-name"><div class="ct-av" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">ΝΔ</div>Νίκος Δημητρίου</div>
+          <div class="ct-val" style="color:var(--green)">89%</div>
+          <div style="font-size:12px;color:var(--text2)">8 μήνες</div>
+          <span class="ct-badge" style="background:rgba(16,185,129,.12);color:var(--green)">€1,400</span>
+        </div>
+        <div class="ct-row">
+          <div class="ct-name"><div class="ct-av" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">ΣΑ</div>Σοφία Αντωνίου</div>
+          <div class="ct-val" style="color:var(--accent)">86%</div>
+          <div style="font-size:12px;color:var(--text2)">2 μήνες</div>
+          <span class="ct-badge" style="background:rgba(59,130,246,.12);color:var(--accent)">€350</span>
+        </div>
+        <div class="ct-row">
+          <div class="ct-name"><div class="ct-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">ΕΤ</div>Ελένη Τσιώτου</div>
+          <div class="ct-val" style="color:var(--orange)">72%</div>
+          <div style="font-size:12px;color:var(--text2)">5 μήνες</div>
+          <span class="ct-badge" style="background:rgba(245,158,11,.1);color:var(--orange)">€875</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHURN RISK -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">AI Κίνδυνος Αποχώρησης</span>
+        <div class="ai-badge-mini" style="display:flex;align-items:center;gap:5px;font-size:10.5px;font-family:var(--font-d);font-weight:600;color:var(--accent2)">
+          <div style="width:5px;height:5px;background:var(--accent2);border-radius:50%;animation:pulse 2s infinite"></div>
+          AI Live
+        </div>
+      </div>
+      @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+      <div class="churn-list">
+        <div class="churn-item churn-high">
+          <div class="churn-av" style="background:linear-gradient(135deg,#ef4444,#f97316)">ΕΤ</div>
+          <div class="churn-info">
+            <div class="churn-name">Ελένη Τσιώτου</div>
+            <div class="churn-reason">3 μέρες αδράνεια · Χαμηλή καταγραφή</div>
+          </div>
+          <div class="churn-score" style="color:var(--red)">78%</div>
+        </div>
+        <div class="churn-item churn-med">
+          <div class="churn-av" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">ΓΑ</div>
+          <div class="churn-info">
+            <div class="churn-name">Γιώργος Αλεξίου</div>
+            <div class="churn-reason">Παράλειψη 2 ραντεβού · Μη ανανέωση</div>
+          </div>
+          <div class="churn-score" style="color:var(--orange)">52%</div>
+        </div>
+        <div class="churn-item churn-med">
+          <div class="churn-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">ΔΒ</div>
+          <div class="churn-info">
+            <div class="churn-name">Δήμητρα Βασιλείου</div>
+            <div class="churn-reason">Πλάνο λήγει σε 2 ημέρες</div>
+          </div>
+          <div class="churn-score" style="color:var(--orange)">41%</div>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:12px;justify-content:center;font-size:12.5px">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v7a2 2 0 01-2 2H7l-4 3V5z"/></svg>
+        Αυτόματο Follow-up με AI
+      </button>
+    </div>
+  </div>
+
+  <!-- AI USAGE + APPOINTMENTS STATS -->
+  <div class="grid-3b">
+    <!-- AI USAGE -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">AI Χρήση — Μάιος</span></div>
+      <div class="ai-usage-grid">
+        <div class="au-item">
+          <div class="au-val" style="color:var(--accent2)">28</div>
+          <div class="au-label">Πλάνα Παραχθ.</div>
+        </div>
+        <div class="au-item">
+          <div class="au-val" style="color:var(--accent3)">142</div>
+          <div class="au-label">Photo Αναλ.</div>
+        </div>
+        <div class="au-item">
+          <div class="au-val" style="color:var(--green)">96</div>
+          <div class="au-label">Insights</div>
+        </div>
+        <div class="au-item">
+          <div class="au-val" style="color:var(--orange)">34</div>
+          <div class="au-label">Μηνύματα AI</div>
+        </div>
+        <div class="au-item">
+          <div class="au-val" style="color:var(--purple)">18</div>
+          <div class="au-label">Συνόψεις</div>
+        </div>
+        <div class="au-item">
+          <div class="au-val" style="color:var(--accent)">38%</div>
+          <div class="au-label">Χρήση Ορίου</div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+          <span style="color:var(--text2)">AI Calls (150 περ. μήνα)</span>
+          <span style="color:var(--accent);font-weight:600">57 / 150</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:38%;background:linear-gradient(90deg,var(--accent2),var(--accent3))"></div></div>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS STATS -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Ραντεβού — Στατιστικά</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="text-align:center;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--accent)">42</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;margin-top:2px">Ολοκλήρωθηκαν</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--red)">3</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;margin-top:2px">Ακυρώσεις</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--green)">93%</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;margin-top:2px">Show Rate</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+          <div style="font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--purple)">52'</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;margin-top:2px">Μέσος Χρόνος</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Τύπος ραντεβού:</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px"><div style="width:8px;height:8px;border-radius:2px;background:var(--accent)"></div><span style="color:var(--text2);flex:1">Zoom</span><span style="font-weight:600">58%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px"><div style="width:8px;height:8px;border-radius:2px;background:var(--green)"></div><span style="color:var(--text2);flex:1">Δια ζώσης</span><span style="font-weight:600">28%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px"><div style="width:8px;height:8px;border-radius:2px;background:var(--purple)"></div><span style="color:var(--text2);flex:1">Google Meet</span><span style="font-weight:600">10%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px"><div style="width:8px;height:8px;border-radius:2px;background:var(--orange)"></div><span style="color:var(--text2);flex:1">Τηλέφωνο</span><span style="font-weight:600">4%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE FORECAST -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">AI Πρόβλεψη Εσόδων</span></div>
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:11px;color:var(--accent2);font-family:var(--font-d);font-weight:700;letter-spacing:.5px;margin-bottom:8px">ΙΟΥΝΙΟΣ 2026 — ΠΡΟΒΛΕΨΗ</div>
+        <div style="font-family:var(--font-d);font-size:38px;font-weight:800;background:linear-gradient(135deg,var(--green),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">€5,640</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px">Εκτιμώμενα έσοδα (+14.6%)</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--surface);border-radius:6px">
+          <span style="color:var(--text2)">Υφιστάμενοι πελάτες</span>
+          <span style="font-weight:600;color:var(--green)">€4,900</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--surface);border-radius:6px">
+          <span style="color:var(--text2)">Εκτιμώμενοι νέοι</span>
+          <span style="font-weight:600;color:var(--accent)">€740</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:6px">
+          <span style="color:var(--text2)">Κίνδυνος αποχώρησης</span>
+          <span style="font-weight:600;color:var(--red)">-€350</span>
+        </div>
+      </div>
+      <div style="font-size:10.5px;color:var(--text3);margin-top:10px;text-align:center">Βάσει ιστορικών δεδομένων & AI μοντέλου</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setPeriod(el) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Revenue Chart
+const months = ['Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ','Ιαν','Φεβ','Μαρ','Απρ','Μαι'];
+const values = [2100,2400,1800,2700,3200,2900,3400,3800,4200,4500,4170,4920];
+const max = Math.max(...values);
+
+const chart = document.getElementById('revenueChart');
+values.forEach((val, i) => {
+  const col = document.createElement('div');
+  col.className = 'bar-col';
+  const pct = (val / max * 100).toFixed(0);
+  const isCurrent = i === values.length - 1;
+  col.innerHTML = `
+    <div class="bar-val" style="font-size:9px;color:${isCurrent?'var(--accent)':'var(--text3)'}">${i>=7?'€'+val.toLocaleString():''}</div>
+    <div class="bar-fill${isCurrent?' current':''}" style="height:${pct}%"></div>
+    <div class="bar-label" style="${isCurrent?'color:var(--accent)':''}">${months[i]}</div>
+  `;
+  chart.appendChild(col);
+});
+
+// Animate bars
+window.addEventListener('load', () => {
+  document.querySelectorAll('.prog-fill, .ret-bar-fill').forEach(b => {
+    const w = b.style.width;
+    b.style.width = '0';
+    setTimeout(() => b.style.width = w, 300);
+  });
+});
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

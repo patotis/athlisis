@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — App Navigation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#080c14;--bg2:#0d1220;--border:rgba(255,255,255,.07);--text:#f0f4ff;--text2:#8892a4;--accent:#3b82f6;--accent2:#6366f1;--green:#10b981;--orange:#f59e0b;--purple:#8b5cf6;--font-d:'Syne',sans-serif;--font-b:'DM Sans',sans-serif}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh;padding:48px 24px}
+  .wrap{max-width:900px;margin:0 auto}
+  .logo{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .lm{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;font-size:20px;color:white;box-shadow:0 0 24px rgba(99,102,241,.4)}
+  .lt{font-family:var(--font-d);font-size:26px;font-weight:800}
+  .subtitle{font-size:14px;color:var(--text2);margin-bottom:40px;margin-left:56px}
+  .section-label{font-size:10px;font-family:var(--font-d);font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;margin-top:32px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:8px}
+  a{text-decoration:none}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:14px;transition:all .2s;cursor:pointer}
+  .card:hover{border-color:rgba(99,102,241,.35);transform:translateY(-2px);background:#0f1829}
+  .ci{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .cn{font-family:var(--font-d);font-size:13.5px;font-weight:700;margin-bottom:3px}
+  .cd{font-size:11.5px;color:var(--text2)}
+  .badge{display:inline-block;font-size:9.5px;font-family:var(--font-d);font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+  .live{background:rgba(16,185,129,.15);color:var(--green)}
+  footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="lm">A</div>
+    <div class="lt">Athlisis</div>
+  </div>
+  <div class="subtitle">AI-Powered Wellness Practice Management · Live Demo</div>
+
+  <div class="section-label">🌐 Public</div>
+  <div class="grid">
+    <a href="index.html"><div class="card"><div class="ci" style="background:rgba(59,130,246,.1)">🌐</div><div><div class="cn">Landing Page <span class="badge live">Live</span></div><div class="cd">athlisis.com marketing site</div></div></div></a>
+    <a href="auth.html"><div class="card"><div class="ci" style="background:rgba(99,102,241,.1)">🔐</div><div><div class="cn">Sign In / Sign Up</div><div class="cd">Auth + 4-step onboarding</div></div></div></a>
+  </div>
+
+  <div class="section-label">📊 Dashboard & Analytics</div>
+  <div class="grid">
+    <a href="dashboard.html"><div class="card"><div class="ci" style="background:rgba(59,130,246,.1)">🏠</div><div><div class="cn">Dashboard</div><div class="cd">Main overview & KPIs</div></div></div></a>
+    <a href="analytics.html"><div class="card"><div class="ci" style="background:rgba(245,158,11,.1)">📈</div><div><div class="cn">Analytics</div><div class="cd">Revenue, retention, AI insights</div></div></div></a>
+  </div>
+
+  <div class="section-label">👥 Clients & Appointments</div>
+  <div class="grid">
+    <a href="client-profile.html"><div class="card"><div class="ci" style="background:rgba(16,185,129,.1)">👤</div><div><div class="cn">Client Profile</div><div class="cd">CRM, measurements, lab results</div></div></div></a>
+    <a href="appointments.html"><div class="card"><div class="ci" style="background:rgba(99,102,241,.1)">📅</div><div><div class="cn">Appointments Calendar</div><div class="cd">Week view, Zoom, drag-drop</div></div></div></a>
+    <a href="messaging.html"><div class="card"><div class="ci" style="background:rgba(139,92,246,.1)">💬</div><div><div class="cn">Messaging Hub</div><div class="cd">Chat, voice notes, AI drafts</div></div></div></a>
+  </div>
+
+  <div class="section-label">🤖 AI & Plans</div>
+  <div class="grid">
+    <a href="meal-plan.html"><div class="card"><div class="ci" style="background:rgba(6,182,212,.1)">🥗</div><div><div class="cn">AI Meal Plan Generator</div><div class="cd">Claude-powered, condition-aware</div></div></div></a>
+    <a href="workout-builder.html"><div class="card"><div class="ci" style="background:rgba(239,68,68,.1)">🏋️</div><div><div class="cn">Workout Builder</div><div class="cd">Drag-drop exercise planner</div></div></div></a>
+    <a href="pdf-report.html"><div class="card"><div class="ci" style="background:rgba(59,130,246,.1)">📄</div><div><div class="cn">PDF Report Generator</div><div class="cd">Branded A4 reports preview</div></div></div></a>
+  </div>
+
+  <div class="section-label">⚙️ Settings & Billing</div>
+  <div class="grid">
+    <a href="settings.html"><div class="card"><div class="ci" style="background:rgba(255,255,255,.05)">⚙️</div><div><div class="cn">Settings</div><div class="cd">Profile, integrations, security</div></div></div></a>
+    <a href="billing.html"><div class="card"><div class="ci" style="background:rgba(99,102,241,.1)">💳</div><div><div class="cn">Billing & Stripe</div><div class="cd">Subscription & invoices</div></div></div></a>
+  </div>
+
+  <div class="section-label">📱 Mobile App</div>
+  <div class="grid">
+    <a href="mobile.html"><div class="card"><div class="ci" style="background:rgba(16,185,129,.1)">📱</div><div><div class="cn">Mobile App Screens</div><div class="cd">4 iOS/Android screens preview</div></div></div></a>
+  </div>
+
+  <footer>
+    Athlisis · Physis Ecosystem · <a href="https://github.com/patotis/athlisis" target="_blank" style="color:var(--accent)">GitHub →</a>
+  </footer>
+</div>
+</body>
+</html>

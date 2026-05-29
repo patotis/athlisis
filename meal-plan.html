@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — AI Meal Plan Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080c14; --bg2: #0d1220; --bg3: #111827;
+    --surface: rgba(255,255,255,0.03); --surface2: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.14);
+    --text: #f0f4ff; --text2: #8892a4; --text3: #4a5568;
+    --accent: #3b82f6; --accent2: #6366f1; --accent3: #06b6d4;
+    --green: #10b981; --orange: #f59e0b; --red: #ef4444; --purple: #8b5cf6;
+    --font-display: 'Syne', sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+  ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* PAGE LAYOUT */
+  .page { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(20px);
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--text2); font-size: 13px; cursor: pointer;
+    transition: color 0.15s; padding: 6px 10px; border-radius: 6px;
+    border: 1px solid transparent;
+  }
+  .back-btn:hover { color: var(--text); background: var(--surface); border-color: var(--border); }
+  .top-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; flex: 1; }
+  .top-subtitle { font-size: 11.5px; color: var(--text2); }
+  .ai-badge-top {
+    display: flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(59,130,246,0.1));
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: 11.5px; font-family: var(--font-display); font-weight: 600;
+    color: var(--accent2);
+  }
+  .ai-pulse { width: 7px; height: 7px; background: var(--accent2); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+  /* MAIN SPLIT */
+  .split { display: grid; grid-template-columns: 400px 1fr; height: calc(100vh - 57px); overflow: hidden; }
+
+  /* FORM PANEL */
+  .form-panel {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 20px;
+    background: var(--bg2);
+  }
+
+  /* RESULT PANEL */
+  .result-panel { overflow-y: auto; padding: 24px; background: var(--bg); }
+
+  /* SECTION */
+  .form-section { display: flex; flex-direction: column; gap: 12px; }
+  .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .section-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .section-title { font-family: var(--font-display); font-size: 12.5px; font-weight: 700; letter-spacing: 0.3px; }
+  .section-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* FORM ELEMENTS */
+  label { display: flex; flex-direction: column; gap: 5px; }
+  .label-text { font-size: 11.5px; color: var(--text2); font-weight: 500; letter-spacing: 0.2px; }
+  
+  input[type="text"], input[type="number"], select, textarea {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    color: var(--text); font-family: var(--font-body); font-size: 13px;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+  select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='%238892a4'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+  select option { background: #1a2035; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  /* CHIP SELECT */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border2); background: var(--surface);
+    font-size: 12px; font-family: var(--font-display); font-weight: 500;
+    color: var(--text2); cursor: pointer; transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip.active { background: rgba(59,130,246,0.15); border-color: var(--accent); color: var(--accent); }
+  .chip.red.active { background: rgba(239,68,68,0.12); border-color: var(--red); color: var(--red); }
+  .chip.orange.active { background: rgba(245,158,11,0.12); border-color: var(--orange); color: var(--orange); }
+  .chip.green.active { background: rgba(16,185,129,0.12); border-color: var(--green); color: var(--green); }
+  .chip.purple.active { background: rgba(139,92,246,0.12); border-color: var(--purple); color: var(--purple); }
+
+  /* RANGE SLIDER */
+  .slider-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .slider-row { display: flex; justify-content: space-between; align-items: center; }
+  .slider-val { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--accent); }
+  input[type="range"] {
+    width: 100%; height: 4px; appearance: none;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent2) 60%, var(--border2) 60%);
+    border-radius: 2px; outline: none; cursor: pointer; border: none; padding: 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none; width: 16px; height: 16px;
+    background: white; border-radius: 50%;
+    box-shadow: 0 0 8px rgba(59,130,246,0.5); cursor: pointer;
+  }
+
+  /* GENERATE BUTTON */
+  .generate-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white; font-family: var(--font-display); font-size: 14px; font-weight: 700;
+    padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 8px 32px rgba(59,130,246,0.35);
+    position: relative; overflow: hidden; margin-top: 8px;
+  }
+  .generate-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(59,130,246,0.45); }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn-icon { font-size: 18px; }
+
+  /* LOADING STATE */
+  .loading-overlay {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 24px; color: var(--text2);
+  }
+  .ai-spinner {
+    width: 64px; height: 64px; position: relative;
+  }
+  .spinner-ring {
+    position: absolute; inset: 0;
+    border-radius: 50%; border: 2px solid transparent;
+    animation: spin 1.5s linear infinite;
+  }
+  .spinner-ring:nth-child(1) { border-top-color: var(--accent); animation-duration: 1.2s; }
+  .spinner-ring:nth-child(2) { border-right-color: var(--accent2); animation-duration: 1.8s; inset: 8px; }
+  .spinner-ring:nth-child(3) { border-bottom-color: var(--accent3); animation-duration: 2.4s; inset: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text); }
+  .loading-step { font-size: 12.5px; color: var(--text2); text-align: center; }
+  .loading-dots::after { content: ''; animation: dots 1.5s steps(4) infinite; }
+  @keyframes dots { 0%{content:'.'} 25%{content:'..'} 50%{content:'...'} 75%{content:''} }
+
+  /* EMPTY STATE */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 16px; text-align: center; padding: 40px;
+  }
+  .empty-icon { font-size: 48px; opacity: 0.4; margin-bottom: 8px; }
+  .empty-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text2); }
+  .empty-sub { font-size: 13px; color: var(--text3); max-width: 280px; line-height: 1.6; }
+
+  /* PLAN OUTPUT */
+  .plan-output { display: flex; flex-direction: column; gap: 20px; animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .plan-header {
+    background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.05) 50%, rgba(6,182,212,0.04) 100%);
+    border: 1px solid rgba(59,130,246,0.15); border-radius: 14px; padding: 22px 24px;
+    position: relative; overflow: hidden;
+  }
+  .plan-header::after {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .plan-client { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .plan-av { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#3b82f6,#6366f1); display:flex;align-items:center;justify-content:center; font-weight:700;font-size:13px;color:white;font-family:var(--font-display); }
+  .plan-client-info { flex: 1; }
+  .plan-client-name { font-size: 14px; font-weight: 600; font-family: var(--font-display); }
+  .plan-client-sub { font-size: 11.5px; color: var(--text2); }
+  .plan-meta-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pmeta { font-size: 11px; font-family: var(--font-display); font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  .macro-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+  .macro-box { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .macro-val { font-family: var(--font-display); font-size: 20px; font-weight: 800; }
+  .macro-val.kcal { background: linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .macro-val.prot { color: #60a5fa; }
+  .macro-val.carb { color: #34d399; }
+  .macro-val.fat_ { color: #fbbf24; }
+  .macro-unit { font-size: 9px; font-family: var(--font-display); font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* DAY TABS */
+  .day-tabs-wrap { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+  .day-tab {
+    flex-shrink: 0; padding: 7px 16px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    font-size: 12.5px; font-family: var(--font-display); font-weight: 600;
+    color: var(--text2); cursor: pointer; transition: all 0.15s;
+  }
+  .day-tab:hover { border-color: var(--border2); color: var(--text); }
+  .day-tab.active { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(99,102,241,0.15)); border-color: rgba(59,130,246,0.4); color: var(--text); }
+
+  /* DAY CONTENT */
+  .day-content { display: flex; flex-direction: column; gap: 12px; }
+  .meal-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+  .meal-card:hover { border-color: var(--border2); }
+  .meal-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .meal-type-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-family: var(--font-display); font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .meal-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .meal-kcal { margin-left: auto; font-size: 12px; font-family: var(--font-display); font-weight: 600; color: var(--text2); }
+  .meal-time { font-size: 11px; color: var(--text3); }
+  .meal-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+  .food-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface); border-radius: 8px; }
+  .food-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .food-amount { font-size: 11.5px; color: var(--text3); white-space: nowrap; }
+  .food-macros { display: flex; gap: 8px; }
+  .fm { font-size: 10.5px; font-family: var(--font-display); font-weight: 600; }
+  .fm.p { color: #60a5fa; } .fm.c { color: #34d399; } .fm.f { color: #fbbf24; }
+
+  .meal-tip { font-size: 12px; color: var(--text2); background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.1); border-radius: 6px; padding: 8px 12px; line-height: 1.5; }
+  .meal-tip-icon { color: var(--accent); margin-right: 4px; }
+
+  /* SUPPLEMENTS */
+  .supp-list { display: flex; flex-direction: column; gap: 8px; }
+  .supp-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.15); border-radius: 8px; }
+  .supp-icon { font-size: 16px; }
+  .supp-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .supp-dose { font-size: 11.5px; color: var(--purple); font-family: var(--font-display); font-weight: 600; }
+  .supp-timing { font-size: 11px; color: var(--text3); }
+
+  /* GROCERY LIST */
+  .grocery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grocery-cat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .grocery-cat-title { font-size: 11px; font-family: var(--font-display); font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .grocery-item { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .grocery-item:last-child { border-bottom: none; }
+  .grocery-qty { color: var(--text2); }
+
+  /* AI NOTES */
+  .ai-notes { background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(59,130,246,0.04)); border: 1px solid rgba(99,102,241,0.15); border-radius: 12px; padding: 16px; }
+  .ai-notes-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-family: var(--font-display); font-size: 12.5px; font-weight: 700; color: var(--accent2); }
+  .ai-note { font-size: 12.5px; color: var(--text2); line-height: 1.65; }
+  .ai-note + .ai-note { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+  /* ACTION BUTTONS */
+  .action-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-sec {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text2); font-size: 12.5px; font-family: var(--font-display); font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-sec:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+  .btn-prim { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; border-color: transparent; box-shadow: 0 4px 16px rgba(59,130,246,0.25); }
+  .btn-prim:hover { box-shadow: 0 6px 24px rgba(59,130,246,0.35); color: white; }
+
+  /* CARD */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .card-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="back-btn" onclick="history.back()">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10H5M9 6l-4 4 4 4"/></svg>
+      Dashboard
+    </div>
+    <div style="width:1px;height:20px;background:var(--border)"></div>
+    <div>
+      <div class="top-title">AI Meal Plan Generator</div>
+      <div class="top-subtitle">Δημιουργία εξατομικευμένου διατροφικού πλάνου</div>
+    </div>
+    <div style="margin-left:auto">
+      <div class="ai-badge-top">
+        <div class="ai-pulse"></div>
+        Athlisis AI — Claude Sonnet
+      </div>
+    </div>
+  </div>
+
+  <!-- SPLIT VIEW -->
+  <div class="split">
+
+    <!-- FORM PANEL -->
+    <div class="form-panel">
+
+      <!-- CLIENT -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(59,130,246,0.1)">👤</div>
+          <div class="section-title" style="color:var(--accent)">Πελάτης</div>
+        </div>
+        <label>
+          <span class="label-text">Επιλογή πελάτη</span>
+          <select id="client-select">
+            <option value="">— Επιλέξτε πελάτη —</option>
+            <option value="1">Μαρία Παπαδοπούλου — Διαβήτης Τ2</option>
+            <option value="2">Αλέξανδρος Κωστόπουλος — Μυϊκή ανάπτυξη</option>
+            <option value="3">Ελένη Τσιώτου — Vegan αθλήτρια</option>
+            <option value="4">Νίκος Δημητρίου — Καρδιαγγειακή υγεία</option>
+            <option value="5">Σοφία Αντωνίου — Hormonal balance</option>
+          </select>
+        </label>
+        <div class="section-sep"></div>
+      </div>
+
+      <!-- ANTHROPOMETRICS -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(16,185,129,0.1)">📏</div>
+          <div class="section-title" style="color:var(--green)">Ανθρωπομετρικά</div>
+        </div>
+        <div class="form-row">
+          <label>
+            <span class="label-text">Ηλικία</span>
+            <input type="number" id="age" value="34" min="16" max="90" placeholder="34">
+          </label>
+          <label>
+            <span class="label-text">Φύλο</span>
+            <select id="gender">
+              <option value="female">Γυναίκα</option>
+              <option value="male">Άνδρας</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>
+            <span class="label-text">Βάρος (kg)</span>
+            <input type="number" id="weight" value="72" min="30" max="200" step="0.1">
+          </label>
+          <label>
+            <span class="label-text">Ύψος (cm)</span>
+            <input type="number" id="height" value="165" min="120" max="220">
+          </label>
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-row">
+            <span class="label-text">Επίπεδο δραστηριότητας</span>
+            <span class="slider-val" id="activity-val">Μέτρια Ενεργός</span>
+          </div>
+          <input type="range" id="activity" min="1" max="5" value="3" oninput="updateActivity(this.value)">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
+            <span>Καθιστικός</span><span>Πολύ Ενεργός</span><span>Αθλητής</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GOAL -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(245,158,11,0.1)">🎯</div>
+          <div class="section-title" style="color:var(--orange)">Στόχος</div>
+        </div>
+        <div class="chip-group" id="goal-chips">
+          <div class="chip active" data-group="goal">Απώλεια βάρους</div>
+          <div class="chip" data-group="goal">Μυϊκή ανάπτυξη</div>
+          <div class="chip" data-group="goal">Συντήρηση</div>
+          <div class="chip" data-group="goal">Αθλητική απόδοση</div>
+          <div class="chip" data-group="goal">Ενδυνάμωση</div>
+          <div class="chip" data-group="goal">Ορμονική ισορροπία</div>
+          <div class="chip" data-group="goal">Γαστρεντερική υγεία</div>
+        </div>
+        <label>
+          <span class="label-text">Στόχος θερμίδων (kcal/ημέρα)</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="number" id="target-cal" value="1750" min="1000" max="5000" step="50">
+            <div style="font-size:11px;color:var(--text3);white-space:nowrap">≈ TDEE auto</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- DIET TYPE -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(99,102,241,0.1)">🥗</div>
+          <div class="section-title" style="color:var(--accent2)">Τύπος Διατροφής</div>
+        </div>
+        <div class="chip-group" id="diet-chips">
+          <div class="chip active green" data-group="diet">Μεσογειακή</div>
+          <div class="chip" data-group="diet">Keto</div>
+          <div class="chip" data-group="diet">Vegan</div>
+          <div class="chip" data-group="diet">Χορτοφαγική</div>
+          <div class="chip" data-group="diet">Paleo</div>
+          <div class="chip" data-group="diet">Intermittent Fasting</div>
+          <div class="chip" data-group="diet">DASH</div>
+          <div class="chip" data-group="diet">Διαβητική</div>
+          <div class="chip" data-group="diet">Καρδιαγγειακή</div>
+          <div class="chip" data-group="diet">Χαμηλοί υδ/κες</div>
+          <div class="chip" data-group="diet">Υψηλή πρωτεΐνη</div>
+          <div class="chip" data-group="diet">Custom</div>
+        </div>
+      </div>
+
+      <!-- ALLERGIES / CONDITIONS -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(239,68,68,0.1)">⚠️</div>
+          <div class="section-title" style="color:var(--red)">Αλλεργίες & Παθήσεις</div>
+        </div>
+        <div class="chip-group">
+          <div class="chip red" data-group="allergy">Γλουτένη</div>
+          <div class="chip red" data-group="allergy">Γαλακτοκομικά</div>
+          <div class="chip red" data-group="allergy">Ξηροί καρποί</div>
+          <div class="chip red" data-group="allergy">Αυγά</div>
+          <div class="chip red" data-group="allergy">Θαλασσινά</div>
+          <div class="chip red" data-group="allergy">Σόγια</div>
+          <div class="chip red" data-group="allergy">Σιτάρι</div>
+        </div>
+        <div class="chip-group" style="margin-top:4px">
+          <div class="chip orange" data-group="condition">Σακχαρώδης διαβήτης Τ2</div>
+          <div class="chip orange" data-group="condition">Υπέρταση</div>
+          <div class="chip orange" data-group="condition">Υπερχοληστερολαιμία</div>
+          <div class="chip orange" data-group="condition">PCOS</div>
+          <div class="chip orange" data-group="condition">Υποθυρεοειδισμός</div>
+          <div class="chip orange" data-group="condition">IBS</div>
+        </div>
+      </div>
+
+      <!-- PLAN SETTINGS -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(6,182,212,0.1)">⚙️</div>
+          <div class="section-title" style="color:var(--accent3)">Ρυθμίσεις Πλάνου</div>
+        </div>
+        <div class="form-row">
+          <label>
+            <span class="label-text">Διάρκεια</span>
+            <select id="duration">
+              <option value="3">3 ημέρες</option>
+              <option value="5">5 ημέρες</option>
+              <option value="7" selected>7 ημέρες</option>
+              <option value="14">14 ημέρες</option>
+              <option value="28">28 ημέρες</option>
+            </select>
+          </label>
+          <label>
+            <span class="label-text">Γεύματα/ημέρα</span>
+            <select id="meals-per-day">
+              <option value="3">3 γεύματα</option>
+              <option value="4">4 γεύματα</option>
+              <option value="5" selected>5 γεύματα</option>
+              <option value="6">6 γεύματα</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>
+            <span class="label-text">Χρόνος μαγειρέματος</span>
+            <select id="cook-time">
+              <option value="minimal">Ελάχιστος</option>
+              <option value="moderate" selected>Μέτριος</option>
+              <option value="extended">Εκτεταμένος</option>
+            </select>
+          </label>
+          <label>
+            <span class="label-text">Κουζίνα</span>
+            <select id="cuisine">
+              <option value="greek" selected>Ελληνική</option>
+              <option value="mediterranean">Μεσογειακή</option>
+              <option value="international">Διεθνής</option>
+            </select>
+          </label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:12.5px;font-weight:500">Συμπεριλαμβάνονται συμπληρώματα</div>
+            <div class="toggle active" id="supp-toggle" onclick="toggleSwitch(this)" style="width:36px;height:20px;background:var(--green);border-radius:10px;cursor:pointer;position:relative;transition:all 0.2s">
+              <div style="position:absolute;top:2px;right:2px;width:16px;height:16px;background:white;border-radius:50%;transition:all 0.2s"></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+            <div style="font-size:12.5px;font-weight:500">Δημιουργία λίστας αγορών</div>
+            <div class="toggle active" id="grocery-toggle" onclick="toggleSwitch(this)" style="width:36px;height:20px;background:var(--green);border-radius:10px;cursor:pointer;position:relative;transition:all 0.2s">
+              <div style="position:absolute;top:2px;right:2px;width:16px;height:16px;background:white;border-radius:50%;transition:all 0.2s"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI NOTES -->
+      <div class="form-section">
+        <label>
+          <span class="label-text">Πρόσθετες οδηγίες για το AI</span>
+          <textarea id="ai-notes" rows="3" placeholder="π.χ. 'Να αποφεύγει το κόκκινο κρέας. Προτιμάει απλά, γρήγορα γεύματα. Προπονείται τα πρωινά.'" style="resize:vertical"></textarea>
+        </label>
+      </div>
+
+      <!-- GENERATE -->
+      <button class="generate-btn" id="generate-btn" onclick="generatePlan()">
+        <span class="btn-icon">✦</span>
+        Δημιουργία με AI
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+      </button>
+
+    </div><!-- /form-panel -->
+
+    <!-- RESULT PANEL -->
+    <div class="result-panel" id="result-panel">
+
+      <!-- EMPTY STATE (default) -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🤖</div>
+        <div class="empty-title">Έτοιμο για δημιουργία</div>
+        <div class="empty-sub">Συμπλήρωσε τα στοιχεία αριστερά και πάτα «Δημιουργία με AI» για να παραχθεί ένα εξατομικευμένο 7ήμερο πλάνο σε δευτερόλεπτα.</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;width:100%;max-width:300px">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2)">
+            <span>⚡</span> Παράγεται σε ~10 δευτερόλεπτα
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2)">
+            <span>🎯</span> Υπολογισμός TDEE & μακροθρεπτικών
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2)">
+            <span>📄</span> Export σε PDF με branding
+          </div>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div class="loading-overlay" id="loading-state" style="display:none">
+        <div class="ai-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+        </div>
+        <div class="loading-title">Το AI δημιουργεί το πλάνο<span class="loading-dots"></span></div>
+        <div class="loading-step" id="loading-step">Υπολογισμός TDEE & μακροθρεπτικών...</div>
+      </div>
+
+      <!-- PLAN OUTPUT -->
+      <div class="plan-output" id="plan-output" style="display:none">
+
+        <!-- HEADER -->
+        <div class="plan-header">
+          <div class="plan-client">
+            <div class="plan-av">ΜΠ</div>
+            <div class="plan-client-info">
+              <div class="plan-client-name">Μαρία Παπαδοπούλου</div>
+              <div class="plan-client-sub">Δημιουργήθηκε με AI • 25 Μαΐου 2026 • 7 ημέρες</div>
+            </div>
+            <div class="ai-badge-top" style="margin-left:auto;font-size:10px;padding:4px 10px">✦ AI Generated</div>
+          </div>
+          <div class="plan-meta-chips">
+            <span class="pmeta" style="background:rgba(16,185,129,0.12);color:var(--green)">🥗 Μεσογειακή</span>
+            <span class="pmeta" style="background:rgba(245,158,11,0.1);color:var(--orange)">⚠️ Διαβήτης Τ2</span>
+            <span class="pmeta" style="background:rgba(59,130,246,0.12);color:var(--accent)">🎯 Απώλεια βάρους</span>
+            <span class="pmeta" style="background:rgba(6,182,212,0.1);color:var(--accent3)">⚡ 5 γεύματα/μέρα</span>
+          </div>
+          <div class="macro-summary">
+            <div class="macro-box">
+              <div class="macro-val kcal">1750</div>
+              <div class="macro-unit">kcal/ημέρα</div>
+            </div>
+            <div class="macro-box">
+              <div class="macro-val prot">95g</div>
+              <div class="macro-unit">Πρωτεΐνη</div>
+            </div>
+            <div class="macro-box">
+              <div class="macro-val carb">180g</div>
+              <div class="macro-unit">Υδατάνθρακες</div>
+            </div>
+            <div class="macro-box">
+              <div class="macro-val fat_">60g</div>
+              <div class="macro-unit">Λίπη</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BAR -->
+        <div class="action-bar">
+          <button class="btn-sec btn-prim">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3H8a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V9l-6-6z"/><path d="M12 3v6h6"/></svg>
+            Αποθήκευση στον Πελάτη
+          </button>
+          <button class="btn-sec">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l3-3m0 0l3 3m-3-3v8M4 4h16M4 8h10M4 12h6"/></svg>
+            Export PDF
+          </button>
+          <button class="btn-sec">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h12M4 10h8M4 14h6"/></svg>
+            Λίστα Αγορών
+          </button>
+          <button class="btn-sec" onclick="generatePlan()">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l4 12 3-6 6-3L4 4z"/></svg>
+            Αναδημιουργία
+          </button>
+        </div>
+
+        <!-- DAY TABS -->
+        <div class="day-tabs-wrap" id="day-tabs">
+          <div class="day-tab active" onclick="showDay(this,0)">Δευ 26/5</div>
+          <div class="day-tab" onclick="showDay(this,1)">Τρι 27/5</div>
+          <div class="day-tab" onclick="showDay(this,2)">Τετ 28/5</div>
+          <div class="day-tab" onclick="showDay(this,3)">Πεμ 29/5</div>
+          <div class="day-tab" onclick="showDay(this,4)">Παρ 30/5</div>
+          <div class="day-tab" onclick="showDay(this,5)">Σαβ 31/5</div>
+          <div class="day-tab" onclick="showDay(this,6)">Κυρ 1/6</div>
+        </div>
+
+        <!-- DAY CONTENT (Day 1 shown) -->
+        <div class="day-content" id="day-content">
+
+          <!-- MEAL 1: BREAKFAST -->
+          <div class="meal-card">
+            <div class="meal-card-header">
+              <div class="meal-type-badge"><div class="meal-dot" style="background:#fbbf24"></div>ΠΡΩΙΝΟ</div>
+              <div class="meal-time">08:00</div>
+              <div class="meal-kcal">385 kcal</div>
+            </div>
+            <div class="meal-body">
+              <div class="food-row">
+                <div class="food-name">🥣 Βρώμη ολικής άλεσης</div>
+                <div class="food-amount">50g</div>
+                <div class="food-macros"><span class="fm p">P 7g</span><span class="fm c">C 30g</span><span class="fm f">F 3g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🍓 Φράουλες</div>
+                <div class="food-amount">100g</div>
+                <div class="food-macros"><span class="fm p">P 1g</span><span class="fm c">C 8g</span><span class="fm f">F 0g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🥛 Γιαούρτι 2% (skyr)</div>
+                <div class="food-amount">150g</div>
+                <div class="food-macros"><span class="fm p">P 15g</span><span class="fm c">C 6g</span><span class="fm f">F 3g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🌰 Καρύδια</div>
+                <div class="food-amount">15g</div>
+                <div class="food-macros"><span class="fm p">P 2g</span><span class="fm c">C 2g</span><span class="fm f">9g</span></div>
+              </div>
+              <div class="meal-tip"><span class="meal-tip-icon">💡</span>Αρκεί λεμονάδα ή πράσινο τσάι χωρίς ζάχαρη. Αποφύγετε φρουτοχυμό (υψηλός γλυκαιμικός δείκτης για ΣΔ2).</div>
+            </div>
+          </div>
+
+          <!-- MEAL 2: SNACK -->
+          <div class="meal-card">
+            <div class="meal-card-header">
+              <div class="meal-type-badge"><div class="meal-dot" style="background:#34d399"></div>ΠΡΩΙΝΟ ΣΝΑΚ</div>
+              <div class="meal-time">10:30</div>
+              <div class="meal-kcal">180 kcal</div>
+            </div>
+            <div class="meal-body">
+              <div class="food-row">
+                <div class="food-name">🍎 Μήλο</div>
+                <div class="food-amount">1 μέτριο (150g)</div>
+                <div class="food-macros"><span class="fm p">P 0g</span><span class="fm c">C 19g</span><span class="fm f">F 0g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🧀 Τυρί κότατζ</div>
+                <div class="food-amount">80g</div>
+                <div class="food-macros"><span class="fm p">P 11g</span><span class="fm c">C 3g</span><span class="fm f">F 5g</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEAL 3: LUNCH -->
+          <div class="meal-card">
+            <div class="meal-card-header">
+              <div class="meal-type-badge"><div class="meal-dot" style="background:#60a5fa"></div>ΜΕΣΗΜΕΡΙΑΝΌ</div>
+              <div class="meal-time">13:00</div>
+              <div class="meal-kcal">520 kcal</div>
+            </div>
+            <div class="meal-body">
+              <div class="food-row">
+                <div class="food-name">🍗 Κοτόπουλο στήθος (ψητό)</div>
+                <div class="food-amount">180g</div>
+                <div class="food-macros"><span class="fm p">P 42g</span><span class="fm c">C 0g</span><span class="fm f">F 6g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🌾 Κινόα μαγειρευμένη</div>
+                <div class="food-amount">150g</div>
+                <div class="food-macros"><span class="fm p">P 6g</span><span class="fm c">C 28g</span><span class="fm f">F 2g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🥗 Χωριάτικη σαλάτα (χωρίς τυρί)</div>
+                <div class="food-amount">200g</div>
+                <div class="food-macros"><span class="fm p">P 2g</span><span class="fm c">C 8g</span><span class="fm f">F 2g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🫒 Ελαιόλαδο</div>
+                <div class="food-amount">10ml</div>
+                <div class="food-macros"><span class="fm p">P 0g</span><span class="fm c">C 0g</span><span class="fm f">F 10g</span></div>
+              </div>
+              <div class="meal-tip"><span class="meal-tip-icon">💡</span>Καταναλώστε πρώτα τη σαλάτα για μειωμένη γλυκαιμική ανταπόκριση — ιδιαίτερα σημαντικό για ΣΔ2.</div>
+            </div>
+          </div>
+
+          <!-- MEAL 4: PM SNACK -->
+          <div class="meal-card">
+            <div class="meal-card-header">
+              <div class="meal-type-badge"><div class="meal-dot" style="background:#a78bfa"></div>ΑΠΟΓΕΥΜΑΤΙΝΌ ΣΝΑΚ</div>
+              <div class="meal-time">16:30</div>
+              <div class="meal-kcal">165 kcal</div>
+            </div>
+            <div class="meal-body">
+              <div class="food-row">
+                <div class="food-name">🫐 Μύρτιλα</div>
+                <div class="food-amount">120g</div>
+                <div class="food-macros"><span class="fm p">P 1g</span><span class="fm c">C 17g</span><span class="fm f">F 0g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🥜 Αμύγδαλα</div>
+                <div class="food-amount">20g</div>
+                <div class="food-macros"><span class="fm p">P 4g</span><span class="fm c">C 3g</span><span class="fm f">F 10g</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEAL 5: DINNER -->
+          <div class="meal-card">
+            <div class="meal-card-header">
+              <div class="meal-type-badge"><div class="meal-dot" style="background:#f97316"></div>ΒΡΑΔΙΝΌ</div>
+              <div class="meal-time">19:30</div>
+              <div class="meal-kcal">500 kcal</div>
+            </div>
+            <div class="meal-body">
+              <div class="food-row">
+                <div class="food-name">🐟 Σολομός φιλέτο (ψητό)</div>
+                <div class="food-amount">150g</div>
+                <div class="food-macros"><span class="fm p">P 30g</span><span class="fm c">C 0g</span><span class="fm f">F 14g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🥦 Λαχανικά στον ατμό (μπρόκολο, κολοκυθάκι)</div>
+                <div class="food-amount">250g</div>
+                <div class="food-macros"><span class="fm p">P 4g</span><span class="fm c">C 10g</span><span class="fm f">F 1g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🍠 Γλυκοπατάτα ψητή</div>
+                <div class="food-amount">120g</div>
+                <div class="food-macros"><span class="fm p">P 2g</span><span class="fm c">C 24g</span><span class="fm f">F 0g</span></div>
+              </div>
+              <div class="food-row">
+                <div class="food-name">🫒 Ελαιόλαδο</div>
+                <div class="food-amount">10ml</div>
+                <div class="food-macros"><span class="fm p">P 0g</span><span class="fm c">C 0g</span><span class="fm f">F 10g</span></div>
+              </div>
+              <div class="meal-tip"><span class="meal-tip-icon">💡</span>Ο σολομός παρέχει Ω-3 λιπαρά οξέα που βοηθούν στη διαχείριση της αντίστασης στην ινσουλίνη.</div>
+            </div>
+          </div>
+
+        </div><!-- /day-content -->
+
+        <!-- SUPPLEMENTS -->
+        <div class="card">
+          <div class="card-title">💊 Συμπληρώματα (AI Προτάσεις)</div>
+          <div class="supp-list">
+            <div class="supp-item">
+              <span class="supp-icon">☀️</span>
+              <span class="supp-name">Βιταμίνη D3</span>
+              <span class="supp-dose">2000 IU</span>
+              <span class="supp-timing">Πρωί με γεύμα</span>
+            </div>
+            <div class="supp-item">
+              <span class="supp-icon">🧲</span>
+              <span class="supp-name">Μαγνήσιο (Glycinate)</span>
+              <span class="supp-dose">300mg</span>
+              <span class="supp-timing">Βράδυ πριν τον ύπνο</span>
+            </div>
+            <div class="supp-item">
+              <span class="supp-icon">🐟</span>
+              <span class="supp-name">Omega-3 (EPA/DHA)</span>
+              <span class="supp-dose">1g EPA + 0.5g DHA</span>
+              <span class="supp-timing">Μεσημεριανό γεύμα</span>
+            </div>
+            <div class="supp-item">
+              <span class="supp-icon">🫐</span>
+              <span class="supp-name">Berberine</span>
+              <span class="supp-dose">500mg</span>
+              <span class="supp-timing">Πριν τα κύρια γεύματα — ΣΔ2 υποστήριξη</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- GROCERY LIST -->
+        <div class="card">
+          <div class="card-title">🛒 Λίστα Αγορών — Εβδομάδα 1</div>
+          <div class="grocery-grid">
+            <div class="grocery-cat">
+              <div class="grocery-cat-title">🥩 Πρωτεΐνες</div>
+              <div class="grocery-item"><span>Κοτόπουλο στήθος</span><span class="grocery-qty">1.2kg</span></div>
+              <div class="grocery-item"><span>Σολομός φιλέτο</span><span class="grocery-qty">900g</span></div>
+              <div class="grocery-item"><span>Αυγά</span><span class="grocery-qty">12τεμ</span></div>
+              <div class="grocery-item"><span>Skyr/Κότατζ</span><span class="grocery-qty">700g</span></div>
+            </div>
+            <div class="grocery-cat">
+              <div class="grocery-cat-title">🥦 Λαχανικά</div>
+              <div class="grocery-item"><span>Μπρόκολο</span><span class="grocery-qty">500g</span></div>
+              <div class="grocery-item"><span>Κολοκυθάκι</span><span class="grocery-qty">400g</span></div>
+              <div class="grocery-item"><span>Σπανάκι</span><span class="grocery-qty">300g</span></div>
+              <div class="grocery-item"><span>Ντομάτες</span><span class="grocery-qty">500g</span></div>
+            </div>
+            <div class="grocery-cat">
+              <div class="grocery-cat-title">🍎 Φρούτα</div>
+              <div class="grocery-item"><span>Μήλα</span><span class="grocery-qty">6τεμ</span></div>
+              <div class="grocery-item"><span>Μύρτιλα</span><span class="grocery-qty">400g</span></div>
+              <div class="grocery-item"><span>Φράουλες</span><span class="grocery-qty">300g</span></div>
+              <div class="grocery-item"><span>Αβοκάντο</span><span class="grocery-qty">3τεμ</span></div>
+            </div>
+            <div class="grocery-cat">
+              <div class="grocery-cat-title">🌾 Σιτηρά & Άλλα</div>
+              <div class="grocery-item"><span>Βρώμη ολικής</span><span class="grocery-qty">500g</span></div>
+              <div class="grocery-item"><span>Κινόα</span><span class="grocery-qty">400g</span></div>
+              <div class="grocery-item"><span>Γλυκοπατάτα</span><span class="grocery-qty">600g</span></div>
+              <div class="grocery-item"><span>Αμύγδαλα / Καρύδια</span><span class="grocery-qty">200g</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI CLINICAL NOTES -->
+        <div class="ai-notes">
+          <div class="ai-notes-header">🤖 AI Κλινικές Παρατηρήσεις</div>
+          <div class="ai-note">Το πλάνο σχεδιάστηκε με <strong>γλυκαιμικό δείκτη &lt;55</strong> για όλα τα κύρια γεύματα, ειδικά για τη διαχείριση ΣΔ2. Αποφεύγονται τα επεξεργασμένα σάκχαρα και οι εξευγενισμένοι υδατάνθρακες.</div>
+          <div class="ai-note">Η κατανομή μακροθρεπτικών (<strong>22% πρωτεΐνη, 41% υδατάνθρακες, 31% λίπη</strong>) αντιστοιχεί στις κατευθυντήριες οδηγίες Ελληνικής Διαβητολογικής Εταιρείας 2024 για ΣΔ2 με στόχο απώλειας βάρους.</div>
+          <div class="ai-note">Συνιστάται <strong>αναθεώρηση σε 4 εβδομάδες</strong> με βάση τιμές HbA1c και εξέλιξη βάρους. Η berberine δεν αντενδείκνυται με τρέχουσα αγωγή, αλλά επιβάλλεται συνεννόηση με τον ιατρό πριν τη λήψη.</div>
+        </div>
+
+      </div><!-- /plan-output -->
+    </div><!-- /result-panel -->
+  </div><!-- /split -->
+</div><!-- /page -->
+
+<script>
+// Activity level labels
+const activityLabels = ['','Καθιστικός','Ελαφρά Ενεργός','Μέτρια Ενεργός','Πολύ Ενεργός','Αθλητής'];
+function updateActivity(val) {
+  document.getElementById('activity-val').textContent = activityLabels[val];
+  const pct = (val-1)/4*100;
+  document.getElementById('activity').style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent2) ${pct}%, var(--border2) ${pct}%)`;
+}
+
+// Chip toggle (single within group for goal/diet, multi for others)
+document.querySelectorAll('.chip[data-group]').forEach(chip => {
+  chip.addEventListener('click', function() {
+    const group = this.dataset.group;
+    const singleGroups = ['goal','diet'];
+    if (singleGroups.includes(group)) {
+      document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c => c.classList.remove('active'));
+    }
+    this.classList.toggle('active');
+  });
+});
+
+// Toggle switches
+function toggleSwitch(el) {
+  const isActive = el.classList.toggle('active');
+  el.style.background = isActive ? 'var(--green)' : 'var(--border2)';
+  const knob = el.querySelector('div');
+  knob.style.right = isActive ? '2px' : '';
+  knob.style.left = isActive ? '' : '2px';
+}
+
+// Loading steps
+const loadingSteps = [
+  'Υπολογισμός TDEE & μακροθρεπτικών...',
+  'Ανάλυση παθήσεων & αλλεργιών...',
+  'Επιλογή κατάλληλων τροφών από βάση δεδομένων...',
+  'Δημιουργία 7 ημερών γευμάτων...',
+  'Βελτιστοποίηση γλυκαιμικού δείκτη...',
+  'Παραγωγή λίστας αγορών...',
+  'Τελικός έλεγχος κλινικών παραμέτρων...'
+];
+
+function generatePlan() {
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('plan-output').style.display = 'none';
+  document.getElementById('loading-state').style.display = 'flex';
+  
+  let step = 0;
+  const stepEl = document.getElementById('loading-step');
+  const interval = setInterval(() => {
+    if (step < loadingSteps.length) {
+      stepEl.textContent = loadingSteps[step++];
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('plan-output').style.display = 'flex';
+        btn.disabled = false;
+      }, 500);
+    }
+  }, 900);
+}
+
+// Day tab switching
+function showDay(el, idx) {
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // In production: load day data from API
+}
+
+// Initialize toggle button positions
+document.querySelectorAll('.toggle').forEach(t => {
+  const knob = t.querySelector('div');
+  if (knob) { knob.style.right = '2px'; knob.style.left = ''; }
+});
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

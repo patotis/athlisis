@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Μαρία Παπαδοπούλου</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080c14; --bg2: #0d1220; --bg3: #111827;
+    --surface: rgba(255,255,255,0.03); --surface2: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+    --text: #f0f4ff; --text2: #8892a4; --text3: #4a5568;
+    --accent: #3b82f6; --accent2: #6366f1; --accent3: #06b6d4;
+    --green: #10b981; --orange: #f59e0b; --red: #ef4444; --purple: #8b5cf6;
+    --font-d: 'Syne', sans-serif; --font-s: 'Instrument Serif', serif; --font-b: 'DM Sans', sans-serif;
+  }
+  html,body { background: var(--bg); color: var(--text); font-family: var(--font-b); min-height: 100vh; }
+  ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 28px; border-bottom: 1px solid var(--border);
+    background: var(--bg2); position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(20px);
+  }
+  .back { display:flex;align-items:center;gap:6px;color:var(--text2);font-size:13px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid transparent;transition:all .15s; }
+  .back:hover { color:var(--text);background:var(--surface);border-color:var(--border); }
+  .tb-title { font-family:var(--font-d);font-size:15px;font-weight:600; }
+  .tb-sub { font-size:11px;color:var(--text2); }
+  .btn-primary { display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.3); }
+  .btn-primary:hover { transform:translateY(-1px);box-shadow:0 6px 28px rgba(59,130,246,.4); }
+  .btn-sec { display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;font-family:var(--font-d);font-weight:500;cursor:pointer;transition:all .15s; }
+  .btn-sec:hover { background:var(--surface2);color:var(--text);border-color:var(--border2); }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, rgba(59,130,246,.07) 0%, rgba(99,102,241,.04) 60%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 28px 0;
+  }
+  .hero-inner { display:flex;gap:24px;align-items:flex-start;max-width:1400px;margin:0 auto; }
+  .avatar-wrap { position:relative;flex-shrink:0; }
+  .avatar {
+    width:80px;height:80px;border-radius:50%;
+    background:linear-gradient(135deg,#3b82f6,#6366f1);
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;font-weight:800;color:white;font-family:var(--font-d);
+    border:3px solid rgba(99,102,241,.3);
+    box-shadow:0 0 32px rgba(99,102,241,.25);
+  }
+  .status-dot {
+    position:absolute;bottom:4px;right:4px;
+    width:16px;height:16px;border-radius:50%;
+    background:var(--green);border:2.5px solid var(--bg2);
+  }
+  .hero-info { flex:1; }
+  .hero-name { font-family:var(--font-d);font-size:26px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px; }
+  .hero-name em { font-family:var(--font-s);font-style:italic;color:var(--accent3);font-weight:400; }
+  .hero-meta { display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px; }
+  .hmeta { font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px; }
+  .hero-tags { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px; }
+  .htag { font-size:11px;font-family:var(--font-d);font-weight:600;padding:3px 10px;border-radius:20px; }
+  .htag.red { background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2); }
+  .htag.orange { background:rgba(245,158,11,.1);color:var(--orange);border:1px solid rgba(245,158,11,.2); }
+  .htag.blue { background:rgba(59,130,246,.1);color:var(--accent);border:1px solid rgba(59,130,246,.2); }
+  .htag.green { background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2); }
+  .htag.purple { background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.2); }
+
+  /* HERO STATS */
+  .hero-stats { display:flex;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:0;background:var(--bg2); }
+  .hstat { flex:1;padding:14px 18px;border-right:1px solid var(--border);text-align:center; }
+  .hstat:last-child { border-right:none; }
+  .hstat-val { font-family:var(--font-d);font-size:20px;font-weight:800;margin-bottom:2px; }
+  .hstat-label { font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-d);font-weight:600; }
+  .hstat-delta { font-size:11px;margin-top:3px; }
+  .delta-up { color:var(--green); } .delta-down { color:var(--red); }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display:flex;gap:2px;padding:0 28px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg2);
+    overflow-x:auto;
+  }
+  .ntab {
+    padding:14px 18px;font-size:13px;font-family:var(--font-d);font-weight:500;
+    color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;
+    white-space:nowrap;transition:all .15s;
+  }
+  .ntab:hover { color:var(--text); }
+  .ntab.active { color:var(--accent);border-bottom-color:var(--accent); }
+
+  /* CONTENT */
+  .content { padding:24px 28px;max-width:1400px;margin:0 auto; }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* GRID */
+  .grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px; }
+  .grid-2 { display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px; }
+  .grid-2b { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px; }
+
+  /* CARDS */
+  .card { background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .2s; }
+  .card:hover { border-color:var(--border2); }
+  .card-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
+  .card-title { font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.2px; }
+  .card-action { font-size:11.5px;color:var(--accent);cursor:pointer;transition:opacity .15s; }
+  .card-action:hover { opacity:.8; }
+
+  /* PROGRESS BARS */
+  .prog-wrap { display:flex;flex-direction:column;gap:10px; }
+  .prog-row { display:flex;flex-direction:column;gap:5px; }
+  .prog-hdr { display:flex;justify-content:space-between;font-size:12px; }
+  .prog-label { color:var(--text2); }
+  .prog-val { font-weight:600;color:var(--text); }
+  .prog-track { height:6px;background:var(--surface2);border-radius:3px;overflow:hidden; }
+  .prog-fill { height:100%;border-radius:3px;transition:width 1s ease; }
+
+  /* WEIGHT CHART */
+  .weight-chart { position:relative;height:120px;margin-top:8px; }
+  .weight-svg { width:100%;height:100%; }
+
+  /* MEASUREMENT TABLE */
+  .meas-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+  .meas-item { background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px; }
+  .meas-label { font-size:10.5px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px; }
+  .meas-val { font-family:var(--font-d);font-size:18px;font-weight:700; }
+  .meas-unit { font-size:11px;color:var(--text3);margin-left:3px; }
+  .meas-delta { font-size:10.5px;margin-top:3px; }
+
+  /* TIMELINE */
+  .timeline { display:flex;flex-direction:column;gap:0; }
+  .tl-item { display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);position:relative; }
+  .tl-item:last-child { border-bottom:none; }
+  .tl-left { display:flex;flex-direction:column;align-items:center;gap:0;width:32px;flex-shrink:0; }
+  .tl-icon { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
+  .tl-line { width:1px;flex:1;background:var(--border);margin-top:4px; }
+  .tl-content { flex:1;padding-top:6px; }
+  .tl-title { font-size:13px;font-weight:500;margin-bottom:3px; }
+  .tl-sub { font-size:11.5px;color:var(--text2);line-height:1.5; }
+  .tl-time { font-size:11px;color:var(--text3);margin-top:4px; }
+
+  /* PLAN LIST */
+  .plan-list { display:flex;flex-direction:column;gap:8px; }
+  .plan-item { display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s; }
+  .plan-item:hover { background:var(--surface2);border-color:var(--border2); }
+  .plan-icon { width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0; }
+  .plan-info { flex:1; }
+  .plan-name { font-size:13px;font-weight:500;margin-bottom:2px; }
+  .plan-meta { font-size:11px;color:var(--text2); }
+  .plan-badge { font-size:10.5px;font-family:var(--font-d);font-weight:600;padding:3px 8px;border-radius:20px; }
+
+  /* LAB RESULTS */
+  .lab-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
+  .lab-item { background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;position:relative; }
+  .lab-name { font-size:11px;color:var(--text2);margin-bottom:6px;font-family:var(--font-d);font-weight:600; }
+  .lab-val { font-family:var(--font-d);font-size:18px;font-weight:700; }
+  .lab-unit { font-size:10px;color:var(--text3); }
+  .lab-ref { font-size:10px;color:var(--text3);margin-top:4px; }
+  .lab-status { position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%; }
+  .lab-ok { background:var(--green); }
+  .lab-warn { background:var(--orange); }
+  .lab-bad { background:var(--red); }
+
+  /* NOTES */
+  .note-box { background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px; }
+  .note-text { font-size:13px;color:var(--text2);line-height:1.7; }
+  textarea.note-edit { width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:var(--font-b);font-size:13px;outline:none;resize:vertical;min-height:100px;line-height:1.7; }
+  textarea.note-edit:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+
+  /* DOCS */
+  .doc-list { display:flex;flex-direction:column;gap:8px; }
+  .doc-item { display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s; }
+  .doc-item:hover { background:var(--surface2);border-color:var(--border2); }
+  .doc-icon { font-size:18px;flex-shrink:0; }
+  .doc-name { font-size:12.5px;font-weight:500;flex:1; }
+  .doc-date { font-size:11px;color:var(--text3); }
+  .doc-size { font-size:11px;color:var(--text3); }
+
+  /* AI SUMMARY */
+  .ai-summary { background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(59,130,246,.05));border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:18px; }
+  .ai-badge { display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-family:var(--font-d);font-weight:600;color:var(--accent2);margin-bottom:12px; }
+  .ai-pulse { width:6px;height:6px;background:var(--accent2);border-radius:50%;animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .ai-text { font-size:13px;color:var(--text2);line-height:1.75; }
+  .ai-text strong { color:var(--text);font-weight:500; }
+
+  /* SECTION LABEL */
+  .slabel { font-family:var(--font-d);font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;margin-top:4px; }
+
+  /* ADHER SCORE */
+  .adh-ring { display:flex;align-items:center;gap:20px; }
+  .ring-svg { flex-shrink:0; }
+  .ring-info { flex:1; }
+  .ring-score { font-family:var(--font-d);font-size:38px;font-weight:800;background:linear-gradient(135deg,var(--green),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .ring-label { font-size:12px;color:var(--text2);margin-top:2px; }
+  .ring-breakdown { display:flex;flex-direction:column;gap:6px;margin-top:12px; }
+  .rb-row { display:flex;align-items:center;gap:8px;font-size:12px; }
+  .rb-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+  .rb-label { color:var(--text2);flex:1; }
+  .rb-val { font-family:var(--font-d);font-weight:600;font-size:12px; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .card { animation:fadeUp .35s ease both; }
+  .card:nth-child(1){animation-delay:.05s} .card:nth-child(2){animation-delay:.1s} .card:nth-child(3){animation-delay:.15s}
+
+  @media(max-width:900px){
+    .grid-3,.grid-2,.grid-2b{grid-template-columns:1fr}
+    .lab-grid{grid-template-columns:1fr 1fr}
+    .hero-stats{flex-wrap:wrap}
+    .hstat{min-width:120px}
+    .hero-inner{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="back">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10H5M9 6l-4 4 4 4"/></svg>
+    Πελάτες
+  </div>
+  <div style="width:1px;height:20px;background:var(--border)"></div>
+  <div style="flex:1">
+    <div class="tb-title">Μαρία Παπαδοπούλου</div>
+    <div class="tb-sub">Ενεργή πελάτης · 3 μήνες</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn-sec">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v7a2 2 0 01-2 2H7l-4 3V5z"/></svg>
+      Μήνυμα
+    </button>
+    <button class="btn-sec">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M7 2v4M13 2v4M3 9h14"/></svg>
+      Ραντεβού
+    </button>
+    <button class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+      Νέο Πλάνο AI
+    </button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div style="flex:1">
+      <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">
+        <div class="avatar-wrap">
+          <div class="avatar">ΜΠ</div>
+          <div class="status-dot"></div>
+        </div>
+        <div class="hero-info">
+          <div class="hero-name">Μαρία <em>Παπαδοπούλου</em></div>
+          <div class="hero-meta">
+            <span class="hmeta">📧 maria.papa@gmail.com</span>
+            <span class="hmeta">📱 +30 694 123 4567</span>
+            <span class="hmeta">🎂 34 ετών · Γυναίκα</span>
+            <span class="hmeta">📍 Αθήνα</span>
+          </div>
+          <div class="hero-tags">
+            <span class="htag red">Σακχαρώδης Διαβήτης Τ2</span>
+            <span class="htag orange">Υπερχοληστερολαιμία</span>
+            <span class="htag blue">Μεσογειακή Δίαιτα</span>
+            <span class="htag green">Απώλεια Βάρους</span>
+            <span class="htag purple">Μέτρια Ενεργή</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="hstat-val" style="color:var(--accent)">72.4<span style="font-size:13px;font-weight:400;color:var(--text3)">kg</span></div>
+          <div class="hstat-label">Τρέχον Βάρος</div>
+          <div class="hstat-delta delta-down">▼ -3.2kg από αρχή</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" style="color:var(--green)">65<span style="font-size:13px;font-weight:400;color:var(--text3)">kg</span></div>
+          <div class="hstat-label">Στόχος Βάρους</div>
+          <div class="hstat-delta" style="color:var(--text3)">7.4kg ακόμα</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" style="color:var(--orange)">26.6<span style="font-size:13px;font-weight:400;color:var(--text3)">BMI</span></div>
+          <div class="hstat-label">Δείκτης ΣΒ</div>
+          <div class="hstat-delta delta-down">▼ από 27.8</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" style="color:var(--purple)">87<span style="font-size:13px;font-weight:400;color:var(--text3)">/100</span></div>
+          <div class="hstat-label">Συμμόρφωση</div>
+          <div class="hstat-delta delta-up">▲ +5% εβδομάδα</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" style="color:var(--accent3)">3<span style="font-size:13px;font-weight:400;color:var(--text3)">μήνες</span></div>
+          <div class="hstat-label">Διάρκεια</div>
+          <div class="hstat-delta" style="color:var(--text3)">Από 25/02/2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV TABS -->
+  <div class="nav-tabs" style="padding:0;margin-top:16px">
+    <div class="ntab active" onclick="showTab(this,'overview')">Επισκόπηση</div>
+    <div class="ntab" onclick="showTab(this,'measurements')">Μετρήσεις</div>
+    <div class="ntab" onclick="showTab(this,'plans')">Πλάνα</div>
+    <div class="ntab" onclick="showTab(this,'lab')">Εξετάσεις</div>
+    <div class="ntab" onclick="showTab(this,'timeline')">Ιστορικό</div>
+    <div class="ntab" onclick="showTab(this,'documents')">Έγγραφα</div>
+    <div class="ntab" onclick="showTab(this,'notes')">Σημειώσεις</div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="tab-panel active" id="tab-overview">
+
+    <div class="grid-2">
+      <!-- LEFT -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- AI SUMMARY -->
+        <div class="ai-summary">
+          <div class="ai-badge"><div class="ai-pulse"></div>AI Σύνοψη Πελάτη</div>
+          <div class="ai-text">
+            Η Μαρία παρουσιάζει <strong>σταθερή πρόοδο</strong> στους 3 μήνες συνεργασίας. Έχει χάσει <strong>3.2kg</strong> με μέσο ρυθμό 1.1kg/μήνα, εντός του ασφαλούς εύρους για ΣΔ2. Η HbA1c βελτιώθηκε από 7.2% σε <strong>6.8%</strong> — εξαιρετικό αποτέλεσμα. Η συμμόρφωση αυτή την εβδομάδα <strong>87/100</strong>, με μεγαλύτερη δυσκολία στο πρωινό γεύμα (παραλείπεται 2-3 φορές/εβδομάδα). Συνιστάται <strong>αναθεώρηση πλάνου</strong> για την ενίσχυση της πρωινής ρουτίνας και έλεγχος ferritin στις επόμενες εξετάσεις.
+          </div>
+        </div>
+
+        <!-- WEIGHT PROGRESS -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Πορεία Βάρους</span>
+            <span class="card-action">Πλήρης ιστορικό →</span>
+          </div>
+          <div class="weight-chart">
+            <svg class="weight-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <line x1="0" y1="30" x2="500" y2="30" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="60" x2="500" y2="60" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="0" y1="90" x2="500" y2="90" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <!-- Target line -->
+              <line x1="0" y1="108" x2="500" y2="108" stroke="rgba(16,185,129,0.3)" stroke-width="1" stroke-dasharray="6,4"/>
+              <text x="6" y="105" fill="#10b981" font-size="9" font-family="Syne">Στόχος 65kg</text>
+              <!-- Area fill -->
+              <path d="M0,20 L60,28 L120,35 L180,42 L240,50 L300,55 L360,62 L420,68 L480,72 L500,74 L500,120 L0,120 Z" fill="url(#wg)"/>
+              <!-- Line -->
+              <path d="M0,20 L60,28 L120,35 L180,42 L240,50 L300,55 L360,62 L420,68 L480,72 L500,74" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- Points -->
+              <circle cx="0" cy="20" r="3.5" fill="#3b82f6"/>
+              <circle cx="120" cy="35" r="3.5" fill="#3b82f6"/>
+              <circle cx="240" cy="50" r="3.5" fill="#3b82f6"/>
+              <circle cx="360" cy="62" r="3.5" fill="#3b82f6"/>
+              <circle cx="500" cy="74" r="4.5" fill="white" stroke="#3b82f6" stroke-width="2"/>
+              <!-- Labels -->
+              <text x="0" y="14" fill="#8892a4" font-size="9" font-family="Syne">75.6</text>
+              <text x="110" y="29" fill="#8892a4" font-size="9" font-family="Syne">74.1</text>
+              <text x="230" y="44" fill="#8892a4" font-size="9" font-family="Syne">73.2</text>
+              <text x="350" y="56" fill="#8892a4" font-size="9" font-family="Syne">72.8</text>
+              <text x="478" y="68" fill="#f0f4ff" font-size="9.5" font-family="Syne" font-weight="700">72.4</text>
+              <!-- X Labels -->
+              <text x="0" y="118" fill="#4a5568" font-size="8.5" font-family="Syne">Φεβ</text>
+              <text x="108" y="118" fill="#4a5568" font-size="8.5" font-family="Syne">Μαρ</text>
+              <text x="228" y="118" fill="#4a5568" font-size="8.5" font-family="Syne">Απρ</text>
+              <text x="348" y="118" fill="#4a5568" font-size="8.5" font-family="Syne">Μαι</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- NUTRITION ADHERENCE -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Εβδομαδιαία Διατροφική Συμμόρφωση</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:14px">
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font-size:10px;color:var(--text3);text-align:center;font-family:var(--font-d);font-weight:600">ΔΕΥ</div>
+              <div style="height:60px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:95%;background:linear-gradient(to top,var(--green),#34d399);border-radius:4px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--green);text-align:center;font-weight:700">95%</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font-size:10px;color:var(--text3);text-align:center;font-family:var(--font-d);font-weight:600">ΤΡΙ</div>
+              <div style="height:60px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:88%;background:linear-gradient(to top,var(--accent),#60a5fa);border-radius:4px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--accent);text-align:center;font-weight:700">88%</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font-size:10px;color:var(--text3);text-align:center;font-family:var(--font-d);font-weight:600">ΤΕΤ</div>
+              <div style="height:60px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:75%;background:linear-gradient(to top,var(--orange),#fbbf24);border-radius:4px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--orange);text-align:center;font-weight:700">75%</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font-size:10px;color:var(--text3);text-align:center;font-family:var(--font-d);font-weight:600">ΠΕΜ</div>
+              <div style="height:60px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:92%;background:linear-gradient(to top,var(--green),#34d399);border-radius:4px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--green);text-align:center;font-weight:700">92%</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font-size:10px;color:var(--text3);text-align:center;font-family:var(--font-d);font-weight:600">ΠΑΡ</div>
+              <div style="height:60px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:85%;background:linear-gradient(to top,var(--accent),#60a5fa);border-radius:4px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--accent);text-align:center;font-weight:700">85%</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font-size:10px;color:var(--text3);text-align:center;font-family:var(--font-d);font-weight:600">ΣΑΒ</div>
+              <div style="height:60px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:78%;background:linear-gradient(to top,var(--orange),#fbbf24);border-radius:4px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--orange);text-align:center;font-weight:700">78%</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font-size:10px;color:var(--text3);text-align:center;font-family:var(--font-d);font-weight:600">ΚΥΡ</div>
+              <div style="height:60px;background:var(--surface);border-radius:4px;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:90%;background:linear-gradient(to top,var(--green),#34d399);border-radius:4px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--green);text-align:center;font-weight:700">90%</div>
+            </div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-row">
+              <div class="prog-hdr"><span class="prog-label">Θερμίδες</span><span class="prog-val">1680 / 1750 kcal</span></div>
+              <div class="prog-track"><div class="prog-fill" style="width:96%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-hdr"><span class="prog-label">Πρωτεΐνη</span><span class="prog-val">88g / 95g</span></div>
+              <div class="prog-track"><div class="prog-fill" style="width:93%;background:linear-gradient(90deg,#60a5fa,#818cf8)"></div></div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-hdr"><span class="prog-label">Υδάτωση</span><span class="prog-val">1.8L / 2.0L</span></div>
+              <div class="prog-track"><div class="prog-fill" style="width:90%;background:linear-gradient(90deg,var(--accent3),#22d3ee)"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- ADHERENCE SCORE -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">Βαθμολογία Συμμόρφωσης</span></div>
+          <div class="adh-ring">
+            <svg class="ring-svg" width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+              <circle cx="45" cy="45" r="38" fill="none" stroke="url(#rg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="213" stroke-dashoffset="28" transform="rotate(-90 45 45)"/>
+              <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+              <text x="45" y="49" text-anchor="middle" fill="white" font-size="18" font-family="Syne" font-weight="800">87</text>
+            </svg>
+            <div class="ring-info">
+              <div class="ring-score">87</div>
+              <div class="ring-label">Εξαιρετικό 🌟</div>
+              <div class="ring-breakdown">
+                <div class="rb-row"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-label">Διατροφή</span><span class="rb-val" style="color:var(--green)">91%</span></div>
+                <div class="rb-row"><div class="rb-dot" style="background:var(--accent)"></div><span class="rb-label">Υδάτωση</span><span class="rb-val" style="color:var(--accent)">84%</span></div>
+                <div class="rb-row"><div class="rb-dot" style="background:var(--orange)"></div><span class="rb-label">Ύπνος</span><span class="rb-val" style="color:var(--orange)">79%</span></div>
+                <div class="rb-row"><div class="rb-dot" style="background:var(--purple)"></div><span class="rb-label">Δραστηριότητα</span><span class="rb-val" style="color:var(--purple)">86%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPCOMING APPOINTMENT -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">Επόμενο Ραντεβού</span><span class="card-action">Αλλαγή →</span></div>
+          <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:14px">
+            <div style="font-size:11px;color:var(--accent);font-family:var(--font-d);font-weight:600;margin-bottom:6px">ΣΗΜΕΡΑ — ZOOM</div>
+            <div style="font-size:16px;font-weight:600;font-family:var(--font-d);margin-bottom:4px">10:00 — Επανεκτίμηση πλάνου</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Αναθεώρηση 3μηνης προόδου, εξέταση αποτελεσμάτων HbA1c</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-primary" style="font-size:12px;padding:7px 14px">Σύνδεση Zoom</button>
+              <button class="btn-sec" style="font-size:12px;padding:7px 14px">Ακύρωση</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVE PLAN -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">Ενεργό Πλάνο</span><span class="card-action">Επεξεργασία →</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:10px">
+            <div style="font-size:22px">🥗</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;margin-bottom:2px">Μεσογειακό Πλάνο Φάση 2</div>
+              <div style="font-size:11px;color:var(--text2)">7 ημέρες · 1750 kcal · ΣΔ2 Adapted</div>
+            </div>
+            <span style="margin-left:auto;font-size:10.5px;font-family:var(--font-d);font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.2)">Ενεργό</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--text2)">Εκπνέει σε <strong style="color:var(--orange)">4 ημέρες</strong> · Τελευταία ανανέωση: 20 Μαΐου</div>
+        </div>
+
+        <!-- QUICK NOTES -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">Σημειώσεις</span><span class="card-action">Επεξεργασία</span></div>
+          <div class="note-box">
+            <div class="note-text">Προτιμά γρήγορα και απλά γεύματα. Δυσκολεύεται με το πρωινό — συχνά παραλείπεται. Δεν τρώει ψάρια εκτός από σολομό και τσιπούρα. Έχει άγχος για τους αριθμούς — να αποφεύγουμε υπερβολική εστίαση σε γραμμάρια στη συνομιλία.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MEASUREMENTS ===== -->
+  <div class="tab-panel" id="tab-measurements">
+    <div class="grid-2b">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Σωματική Σύσταση</span><span class="card-action">+ Νέα Μέτρηση</span></div>
+        <div class="meas-grid">
+          <div class="meas-item"><div class="meas-label">Βάρος</div><div class="meas-val" style="color:var(--accent)">72.4<span class="meas-unit">kg</span></div><div class="meas-delta delta-down">▼ -3.2kg από αρχή</div></div>
+          <div class="meas-item"><div class="meas-label">Λίπος Σώματος</div><div class="meas-val" style="color:var(--orange)">31.2<span class="meas-unit">%</span></div><div class="meas-delta delta-down">▼ -2.1%</div></div>
+          <div class="meas-item"><div class="meas-label">Μυϊκή Μάζα</div><div class="meas-val" style="color:var(--green)">43.8<span class="meas-unit">kg</span></div><div class="meas-delta delta-up">▲ +0.8kg</div></div>
+          <div class="meas-item"><div class="meas-label">BMI</div><div class="meas-val" style="color:var(--orange)">26.6</div><div class="meas-delta delta-down">▼ από 27.8</div></div>
+          <div class="meas-item"><div class="meas-label">Μέση</div><div class="meas-val">82<span class="meas-unit">cm</span></div><div class="meas-delta delta-down">▼ -4cm</div></div>
+          <div class="meas-item"><div class="meas-label">Ισχία</div><div class="meas-val">98<span class="meas-unit">cm</span></div><div class="meas-delta delta-down">▼ -3cm</div></div>
+          <div class="meas-item"><div class="meas-label">Ύψος</div><div class="meas-val">165<span class="meas-unit">cm</span></div><div class="meas-delta" style="color:var(--text3)">Σταθερό</div></div>
+          <div class="meas-item"><div class="meas-label">Βασικός Μεταβολισμός</div><div class="meas-val" style="color:var(--purple)">1480<span class="meas-unit">kcal</span></div><div class="meas-delta delta-up">▲ +12kcal</div></div>
+          <div class="meas-item"><div class="meas-label">Σπλαχνικό Λίπος</div><div class="meas-val" style="color:var(--orange)">9</div><div class="meas-delta delta-down">▼ από 11</div></div>
+          <div class="meas-item"><div class="meas-label">Υγρά Σώματος</div><div class="meas-val" style="color:var(--accent3)">51.2<span class="meas-unit">%</span></div><div class="meas-delta delta-up">▲ +1.5%</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Ιστορικό Μετρήσεων</span></div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px;font-family:var(--font-d);font-weight:600;color:var(--text3)">
+            <span>Ημ/νία</span><span>Βάρος</span><span>Λίπος</span><span>Μέση</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12.5px">
+            <span style="color:var(--text2)">25/05/26</span><span style="font-weight:600">72.4kg</span><span style="color:var(--orange)">31.2%</span><span>82cm</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12.5px">
+            <span style="color:var(--text2)">01/05/26</span><span>72.8kg</span><span style="color:var(--orange)">32.1%</span><span>83cm</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12.5px">
+            <span style="color:var(--text2)">01/04/26</span><span>73.8kg</span><span style="color:var(--orange)">32.9%</span><span>84cm</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12.5px">
+            <span style="color:var(--text2)">01/03/26</span><span>74.6kg</span><span style="color:var(--red)">33.3%</span><span>85cm</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 1fr;gap:8px;padding:10px 0;font-size:12.5px">
+            <span style="color:var(--text2)">25/02/26</span><span style="color:var(--text3)">75.6kg</span><span style="color:var(--red)">33.8%</span><span style="color:var(--text3)">86cm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PLANS ===== -->
+  <div class="tab-panel" id="tab-plans">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Διατροφικά Πλάνα</span><button class="btn-primary" style="font-size:12px;padding:7px 14px">+ Νέο Πλάνο AI</button></div>
+      <div class="plan-list">
+        <div class="plan-item">
+          <div class="plan-icon" style="background:rgba(16,185,129,.1)">🥗</div>
+          <div class="plan-info">
+            <div class="plan-name">Μεσογειακό Πλάνο Φάση 2</div>
+            <div class="plan-meta">20–27 Μαΐου 2026 · 1750 kcal · AI Generated</div>
+          </div>
+          <span class="plan-badge" style="background:rgba(16,185,129,.12);color:var(--green)">Ενεργό</span>
+        </div>
+        <div class="plan-item">
+          <div class="plan-icon" style="background:rgba(59,130,246,.1)">🥗</div>
+          <div class="plan-info">
+            <div class="plan-name">Μεσογειακό Πλάνο Φάση 1</div>
+            <div class="plan-meta">25 Φεβ – 19 Μαΐου 2026 · 1800 kcal</div>
+          </div>
+          <span class="plan-badge" style="background:rgba(255,255,255,.06);color:var(--text3)">Ολοκληρωμένο</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LAB ===== -->
+  <div class="tab-panel" id="tab-lab">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Τελευταίες Εξετάσεις — Μάιος 2026</span><span class="card-action">+ Νέες Εξετάσεις</span></div>
+      <div class="lab-grid">
+        <div class="lab-item"><div class="lab-status lab-warn"></div><div class="lab-name">HbA1c</div><div class="lab-val" style="color:var(--orange)">6.8<span class="lab-unit">%</span></div><div class="lab-ref">Φυσιολογικό: &lt;6.5%</div></div>
+        <div class="lab-item"><div class="lab-status lab-ok"></div><div class="lab-name">Γλυκόζη νηστείας</div><div class="lab-val" style="color:var(--green)">108<span class="lab-unit">mg/dL</span></div><div class="lab-ref">Φυσιολογικό: 70–110</div></div>
+        <div class="lab-item"><div class="lab-status lab-warn"></div><div class="lab-name">Χοληστερόλη</div><div class="lab-val" style="color:var(--orange)">215<span class="lab-unit">mg/dL</span></div><div class="lab-ref">Επιθυμητό: &lt;200</div></div>
+        <div class="lab-item"><div class="lab-status lab-ok"></div><div class="lab-name">HDL</div><div class="lab-val" style="color:var(--green)">52<span class="lab-unit">mg/dL</span></div><div class="lab-ref">Φυσιολογικό: &gt;50</div></div>
+        <div class="lab-item"><div class="lab-status lab-warn"></div><div class="lab-name">LDL</div><div class="lab-val" style="color:var(--orange)">138<span class="lab-unit">mg/dL</span></div><div class="lab-ref">Επιθυμητό: &lt;130</div></div>
+        <div class="lab-item"><div class="lab-status lab-ok"></div><div class="lab-name">Τριγλυκερίδια</div><div class="lab-val" style="color:var(--green)">142<span class="lab-unit">mg/dL</span></div><div class="lab-ref">Φυσιολογικό: &lt;150</div></div>
+        <div class="lab-item"><div class="lab-status lab-bad"></div><div class="lab-name">Βιταμίνη D</div><div class="lab-val" style="color:var(--red)">18<span class="lab-unit">ng/mL</span></div><div class="lab-ref">Επιθυμητό: &gt;30</div></div>
+        <div class="lab-item"><div class="lab-status lab-ok"></div><div class="lab-name">Βιταμίνη B12</div><div class="lab-val" style="color:var(--green)">380<span class="lab-unit">pg/mL</span></div><div class="lab-ref">Φυσιολογικό: 200–900</div></div>
+        <div class="lab-item"><div class="lab-status lab-ok"></div><div class="lab-name">Φερριτίνη</div><div class="lab-val" style="color:var(--green)">38<span class="lab-unit">ng/mL</span></div><div class="lab-ref">Φυσιολογικό: 15–150</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TIMELINE ===== -->
+  <div class="tab-panel" id="tab-timeline">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Ιστορικό Δραστηριοτήτων</span></div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-icon" style="background:rgba(59,130,246,.1)">📊</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title">Νέες εξετάσεις αίματος ανέβηκαν</div><div class="tl-sub">HbA1c 6.8% — βελτίωση από 7.2%. Βιταμίνη D χαμηλή (18 ng/mL).</div><div class="tl-time">Σήμερα, 09:30</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-icon" style="background:rgba(99,102,241,.1)">🤖</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title">AI δημιούργησε Μεσογειακό Πλάνο Φάση 2</div><div class="tl-sub">7ήμερο πλάνο 1750 kcal, προσαρμοσμένο για ΣΔ2 και χαμηλό γλυκαιμικό δείκτη.</div><div class="tl-time">20 Μαΐου, 14:22</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-icon" style="background:rgba(16,185,129,.1)">⚖️</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title">Μέτρηση βάρους — 72.4kg</div><div class="tl-sub">Μείωση 0.4kg από προηγούμενη εβδομάδα. Σωματικό λίπος 31.2%.</div><div class="tl-time">25 Μαΐου, 08:15</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-icon" style="background:rgba(245,158,11,.1)">📅</div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-title">Ραντεβού — Επανεκτίμηση 2μηνης προόδου</div><div class="tl-sub">Zoom 45 λεπτά. Ανάλυση αποτελεσμάτων και αναπροσαρμογή στόχων.</div><div class="tl-time">1 Μαΐου, 10:00</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-icon" style="background:rgba(59,130,246,.1)">💬</div></div>
+          <div class="tl-content"><div class="tl-title">Ξεκίνησε η συνεργασία</div><div class="tl-sub">Αρχικό ραντεβού αξιολόγησης. Στόχος: απώλεια 10kg, διαχείριση ΣΔ2, βελτίωση λιπιδίων.</div><div class="tl-time">25 Φεβρουαρίου, 11:00</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DOCUMENTS ===== -->
+  <div class="tab-panel" id="tab-documents">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Έγγραφα</span><button class="btn-sec">+ Ανέβασμα</button></div>
+      <div class="doc-list">
+        <div class="doc-item"><span class="doc-icon">🩸</span><span class="doc-name">Εξετάσεις Αίματος — Μάιος 2026.pdf</span><span class="doc-date">25/05/2026</span><span class="doc-size">1.2 MB</span></div>
+        <div class="doc-item"><span class="doc-icon">🥗</span><span class="doc-name">Μεσογειακό Πλάνο Φάση 2.pdf</span><span class="doc-date">20/05/2026</span><span class="doc-size">450 KB</span></div>
+        <div class="doc-item"><span class="doc-icon">🩸</span><span class="doc-name">Εξετάσεις Αίματος — Φεβρουάριος 2026.pdf</span><span class="doc-date">20/02/2026</span><span class="doc-size">980 KB</span></div>
+        <div class="doc-item"><span class="doc-icon">📋</span><span class="doc-name">Ιατρικό Ιστορικό — Αρχικό.pdf</span><span class="doc-date">25/02/2026</span><span class="doc-size">320 KB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOTES ===== -->
+  <div class="tab-panel" id="tab-notes">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Κλινικές Σημειώσεις</span><button class="btn-primary" style="font-size:12px;padding:7px 14px" onclick="saveNote()">Αποθήκευση</button></div>
+      <textarea class="note-edit" id="notes-area">Προτιμά γρήγορα και απλά γεύματα. Δυσκολεύεται με το πρωινό — συχνά παραλείπεται λόγω βιασύνης για τη δουλειά. Δεν τρώει ψάρια εκτός από σολομό και τσιπούρα.
+
+Έχει άγχος για τους αριθμούς — να αποφεύγουμε υπερβολική εστίαση σε γραμμάρια στη συνομιλία. Να εστιάζουμε σε ποιοτικές επιλογές.
+
+Δουλεύει από το σπίτι — εύκολη πρόσβαση στο μαγείρεμα. Αθλητική δραστηριότητα: 30 λεπτά βόλτα 4x/εβδομάδα.
+
+Επόμενο βήμα: Έλεγχος Βιταμίνης D σε 3 μήνες μετά συμπληρωματοθεραπεία (D3 2000 IU/ημέρα).</textarea>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+function showTab(el, tabId) {
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
+function saveNote() {
+  const btn = event.target;
+  btn.textContent = '✓ Αποθηκεύτηκε';
+  btn.style.background = 'linear-gradient(135deg, var(--green), #34d399)';
+  setTimeout(() => {
+    btn.textContent = 'Αποθήκευση';
+    btn.style.background = '';
+  }, 2000);
+}
+
+// Animate progress bars on load
+window.addEventListener('load', () => {
+  document.querySelectorAll('.prog-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(() => { bar.style.width = w; }, 300);
+  });
+});
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

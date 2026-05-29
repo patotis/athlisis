@@ -1,0 +1,19 @@
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Cache-Control = "public, max-age=3600"
+
+[[redirects]]
+  from = "/app"
+  to = "/dashboard.html"
+  status = 302
+
+[[redirects]]
+  from = "/demo"
+  to = "/nav.html"
+  status = 302

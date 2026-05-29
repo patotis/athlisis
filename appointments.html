@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Ημερολόγιο Ραντεβού</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080c14; --bg2: #0d1220; --bg3: #111827;
+    --surface: rgba(255,255,255,0.03); --surface2: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+    --text: #f0f4ff; --text2: #8892a4; --text3: #4a5568;
+    --accent: #3b82f6; --accent2: #6366f1; --accent3: #06b6d4;
+    --green: #10b981; --orange: #f59e0b; --red: #ef4444; --purple: #8b5cf6;
+    --font-d: 'Syne', sans-serif; --font-b: 'DM Sans', sans-serif;
+  }
+  html, body { height: 100vh; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-b); }
+
+  /* TOPBAR */
+  .topbar { display:flex;align-items:center;gap:14px;padding:13px 24px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0; }
+  .btn-primary { display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.3);white-space:nowrap; }
+  .btn-primary:hover { transform:translateY(-1px); }
+  .btn-sec { display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;font-family:var(--font-d);font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap; }
+  .btn-sec:hover { background:var(--surface2);color:var(--text);border-color:var(--border2); }
+
+  /* LAYOUT */
+  .app { display:flex;flex-direction:column;height:100vh; }
+  .body { display:flex;flex:1;overflow:hidden; }
+
+  /* SIDEBAR */
+  .cal-sidebar { width:280px;border-right:1px solid var(--border);background:var(--bg2);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto; }
+
+  /* MINI CALENDAR */
+  .mini-cal { padding:20px; }
+  .mini-cal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+  .mini-month { font-family:var(--font-d);font-size:14px;font-weight:700; }
+  .nav-arrow { width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:all .15s;flex-shrink:0; }
+  .nav-arrow:hover { background:var(--surface2);color:var(--text); }
+  .mini-grid { display:grid;grid-template-columns:repeat(7,1fr);gap:2px; }
+  .mini-dow { text-align:center;font-size:9.5px;font-family:var(--font-d);font-weight:700;color:var(--text3);padding:4px 0; }
+  .mini-day { text-align:center;padding:5px 2px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s;color:var(--text2); }
+  .mini-day:hover { background:var(--surface2);color:var(--text); }
+  .mini-day.today { background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-weight:700; }
+  .mini-day.selected { background:rgba(59,130,246,.15);color:var(--accent);font-weight:600; }
+  .mini-day.other-month { color:var(--text3);opacity:.4; }
+  .mini-day.has-appt::after { content:'';display:block;width:4px;height:4px;background:var(--accent3);border-radius:50%;margin:1px auto 0; }
+
+  /* UPCOMING */
+  .upcoming { padding:0 16px 16px; }
+  .up-label { font-size:10px;font-family:var(--font-d);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px; }
+  .up-item { display:flex;gap:10px;padding:10px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s; }
+  .up-item:hover { background:var(--surface2);border-color:var(--border2); }
+  .up-time { font-family:var(--font-d);font-size:12px;font-weight:700;color:var(--accent);min-width:36px; }
+  .up-info { flex:1; }
+  .up-name { font-size:12px;font-weight:500;margin-bottom:2px; }
+  .up-type { font-size:10.5px;color:var(--text2); }
+  .up-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+
+  /* VIEW TOGGLE */
+  .view-toggle { display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px; }
+  .vt { padding:5px 12px;border-radius:6px;font-size:12px;font-family:var(--font-d);font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s; }
+  .vt.active { background:var(--bg3);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3); }
+
+  /* MAIN CALENDAR */
+  .cal-main { flex:1;display:flex;flex-direction:column;overflow:hidden; }
+  .cal-header { display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0; }
+  .cal-period { font-family:var(--font-d);font-size:16px;font-weight:700;flex:1; }
+
+  /* WEEK VIEW */
+  .week-view { flex:1;display:flex;flex-direction:column;overflow:hidden; }
+  .week-header { display:grid;grid-template-columns:60px repeat(7,1fr);border-bottom:1px solid var(--border);flex-shrink:0; }
+  .wh-time { padding:10px 8px;border-right:1px solid var(--border); }
+  .wh-day { padding:10px 12px;border-right:1px solid var(--border);text-align:center;cursor:pointer;transition:all .15s; }
+  .wh-day:hover { background:var(--surface); }
+  .wh-day:last-child { border-right:none; }
+  .wh-dow { font-size:10px;font-family:var(--font-d);font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px; }
+  .wh-date { font-family:var(--font-d);font-size:18px;font-weight:800; }
+  .wh-date.today { width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;color:white;font-size:15px; }
+
+  /* TIME GRID */
+  .time-grid { flex:1;overflow-y:auto;display:grid;grid-template-columns:60px repeat(7,1fr);position:relative; }
+  .time-col { display:contents; }
+  .time-label { padding:0 8px;font-size:10px;color:var(--text3);font-family:var(--font-d);text-align:right;padding-top:6px;height:60px;border-right:1px solid var(--border);position:relative; }
+  .time-label::after { content:'';position:absolute;right:0;top:0;width:calc(100vw - 60px);height:1px;background:var(--border); }
+  .day-col { border-right:1px solid var(--border);position:relative;min-height:1440px;cursor:pointer;transition:background .15s; }
+  .day-col:hover { background:rgba(255,255,255,.01); }
+  .day-col:last-child { border-right:none; }
+  .day-col.today-col { background:rgba(59,130,246,.02); }
+
+  /* APPOINTMENTS ON GRID */
+  .appt-block {
+    position:absolute;left:4px;right:4px;
+    border-radius:8px;padding:7px 9px;cursor:pointer;
+    transition:all .2s;overflow:hidden;border-left:3px solid;
+    box-shadow:0 2px 8px rgba(0,0,0,.3);
+  }
+  .appt-block:hover { transform:scale(1.02);box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:10; }
+  .appt-time { font-size:10px;font-family:var(--font-d);font-weight:600;opacity:.8;margin-bottom:2px; }
+  .appt-name { font-size:11.5px;font-weight:600;font-family:var(--font-d);line-height:1.3; }
+  .appt-type { font-size:10px;opacity:.7;margin-top:2px; }
+
+  /* CURRENT TIME */
+  .now-line { position:absolute;left:0;right:0;height:2px;background:var(--red);z-index:20;pointer-events:none; }
+  .now-dot { position:absolute;left:-4px;top:-4px;width:10px;height:10px;background:var(--red);border-radius:50'; }
+
+  /* MODAL */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s; }
+  .modal-overlay.open { opacity:1;pointer-events:all; }
+  .modal { background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:24px;width:480px;max-width:95vw;animation:slideUp .25s ease both; }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
+  .modal-title { font-family:var(--font-d);font-size:16px;font-weight:700; }
+  .modal-close { width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s; }
+  .modal-close:hover { background:var(--surface2);color:var(--text); }
+  .form-group { display:flex;flex-direction:column;gap:5px;margin-bottom:14px; }
+  .form-label { font-size:11.5px;color:var(--text2);font-weight:500; }
+  input, select { background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font-b);font-size:13px;outline:none;transition:border-color .2s;width:100%; }
+  input:focus, select:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+  select option { background:#1a2035; }
+  .form-row { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+  .type-chips { display:flex;gap:6px;flex-wrap:wrap; }
+  .tchip { padding:6px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);font-size:12px;font-family:var(--font-d);font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s; }
+  .tchip.active { border-color:var(--accent);background:rgba(59,130,246,.12);color:var(--accent); }
+  .modal-footer { display:flex;gap:8px;margin-top:20px;justify-content:flex-end; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div style="font-family:var(--font-d);font-size:15px;font-weight:600;flex:1">Ημερολόγιο Ραντεβού</div>
+    <div class="view-toggle">
+      <div class="vt" onclick="setView(this,'day')">Ημέρα</div>
+      <div class="vt active" onclick="setView(this,'week')">Εβδομάδα</div>
+      <div class="vt" onclick="setView(this,'month')">Μήνας</div>
+    </div>
+    <button class="btn-sec">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10h12M10 4v12"/></svg>
+      Σήμερα
+    </button>
+    <div style="display:flex;gap:4px">
+      <div class="nav-arrow" onclick="prevWeek()"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 5l-5 5 5 5"/></svg></div>
+      <div class="nav-arrow" onclick="nextWeek()"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 5l5 5-5 5"/></svg></div>
+    </div>
+    <button class="btn-primary" onclick="openModal()">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5v10M5 10h10"/></svg>
+      Νέο Ραντεβού
+    </button>
+  </div>
+
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <div class="cal-sidebar">
+      <!-- MINI CALENDAR -->
+      <div class="mini-cal">
+        <div class="mini-cal-header">
+          <div class="mini-month">Μάιος 2026</div>
+          <div style="display:flex;gap:4px">
+            <div class="nav-arrow"><svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 5l-5 5 5 5"/></svg></div>
+            <div class="nav-arrow"><svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 5l5 5-5 5"/></svg></div>
+          </div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini-dow">Δ</div><div class="mini-dow">Τ</div><div class="mini-dow">Τ</div><div class="mini-dow">Π</div><div class="mini-dow">Π</div><div class="mini-dow">Σ</div><div class="mini-dow">Κ</div>
+          <!-- Week 1 -->
+          <div class="mini-day other-month">28</div><div class="mini-day other-month">29</div><div class="mini-day other-month">30</div><div class="mini-day other-month">1</div><div class="mini-day other-month">2</div><div class="mini-day other-month">3</div><div class="mini-day other-month">4</div>
+          <!-- Week 2 -->
+          <div class="mini-day has-appt">5</div><div class="mini-day">6</div><div class="mini-day has-appt">7</div><div class="mini-day">8</div><div class="mini-day has-appt">9</div><div class="mini-day">10</div><div class="mini-day">11</div>
+          <!-- Week 3 -->
+          <div class="mini-day has-appt">12</div><div class="mini-day">13</div><div class="mini-day has-appt">14</div><div class="mini-day has-appt">15</div><div class="mini-day">16</div><div class="mini-day">17</div><div class="mini-day">18</div>
+          <!-- Week 4 -->
+          <div class="mini-day">19</div><div class="mini-day has-appt">20</div><div class="mini-day has-appt">21</div><div class="mini-day has-appt">22</div><div class="mini-day has-appt">23</div><div class="mini-day has-appt">24</div><div class="mini-day">25</div>
+          <!-- Week 5 (current) -->
+          <div class="mini-day selected has-appt">26</div><div class="mini-day has-appt">27</div><div class="mini-day today">28</div><div class="mini-day has-appt">29</div><div class="mini-day">30</div><div class="mini-day">31</div><div class="mini-day other-month">1</div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:0 16px"></div>
+
+      <!-- UPCOMING -->
+      <div class="upcoming" style="margin-top:16px">
+        <div class="up-label">Σήμερα — 28 Μαΐου</div>
+        <div class="up-item" onclick="openApptDetail('maria')">
+          <div class="up-time">10:00</div>
+          <div class="up-info">
+            <div class="up-name">Μαρία Παπαδοπούλου</div>
+            <div class="up-type">📹 Zoom · Επανεκτίμηση</div>
+          </div>
+          <div class="up-dot" style="background:var(--accent)"></div>
+        </div>
+        <div class="up-item" onclick="openApptDetail('alex')">
+          <div class="up-time">12:30</div>
+          <div class="up-info">
+            <div class="up-name">Αλέξανδρος Κωστόπουλος</div>
+            <div class="up-type">🏃 Δια ζώσης · Σωματική σύσταση</div>
+          </div>
+          <div class="up-dot" style="background:var(--green)"></div>
+        </div>
+        <div class="up-item" onclick="openApptDetail('nikos')">
+          <div class="up-time">16:00</div>
+          <div class="up-info">
+            <div class="up-name">Νίκος Δημητρίου</div>
+            <div class="up-type">📹 Google Meet · Follow-up</div>
+          </div>
+          <div class="up-dot" style="background:var(--purple)"></div>
+        </div>
+
+        <div class="up-label" style="margin-top:16px">Αύριο — 29 Μαΐου</div>
+        <div class="up-item">
+          <div class="up-time">09:00</div>
+          <div class="up-info">
+            <div class="up-name">Σοφία Αντωνίου</div>
+            <div class="up-type">📹 Zoom · Νέος πελάτης</div>
+          </div>
+          <div class="up-dot" style="background:var(--orange)"></div>
+        </div>
+        <div class="up-item">
+          <div class="up-time">11:00</div>
+          <div class="up-info">
+            <div class="up-name">Ελένη Τσιώτου</div>
+            <div class="up-type">📞 Τηλέφωνο · Check-in</div>
+          </div>
+          <div class="up-dot" style="background:var(--accent3)"></div>
+        </div>
+
+        <!-- STATS -->
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+          <div class="up-label">Εβδομάδα</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-family:var(--font-d);font-size:20px;font-weight:800;color:var(--accent)">12</div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600">Ραντεβού</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-family:var(--font-d);font-size:20px;font-weight:800;color:var(--green)">2</div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600">Ελεύθερες ώρες</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CALENDAR -->
+    <div class="cal-main">
+      <div class="cal-header">
+        <div class="cal-period">26 Μαΐου – 1 Ιουνίου 2026</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text2)"><div style="width:10px;height:10px;border-radius:3px;background:rgba(59,130,246,.5)"></div>Zoom</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text2)"><div style="width:10px;height:10px;border-radius:3px;background:rgba(16,185,129,.5)"></div>Δια ζώσης</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text2)"><div style="width:10px;height:10px;border-radius:3px;background:rgba(139,92,246,.5)"></div>Meet</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text2)"><div style="width:10px;height:10px;border-radius:3px;background:rgba(245,158,11,.5)"></div>Τηλέφωνο</div>
+        </div>
+      </div>
+
+      <!-- WEEK VIEW -->
+      <div class="week-view">
+        <!-- HEADER -->
+        <div class="week-header">
+          <div class="wh-time"></div>
+          <div class="wh-day">
+            <div class="wh-dow">ΔΕΥ</div>
+            <div class="wh-date">26</div>
+          </div>
+          <div class="wh-day">
+            <div class="wh-dow">ΤΡΙ</div>
+            <div class="wh-date">27</div>
+          </div>
+          <div class="wh-day" style="background:rgba(59,130,246,.04)">
+            <div class="wh-dow" style="color:var(--accent)">ΤΕΤ</div>
+            <div class="wh-date today">28</div>
+          </div>
+          <div class="wh-day">
+            <div class="wh-dow">ΠΕΜ</div>
+            <div class="wh-date">29</div>
+          </div>
+          <div class="wh-day">
+            <div class="wh-dow">ΠΑΡ</div>
+            <div class="wh-date">30</div>
+          </div>
+          <div class="wh-day">
+            <div class="wh-dow">ΣΑΒ</div>
+            <div class="wh-date">31</div>
+          </div>
+          <div class="wh-day">
+            <div class="wh-dow">ΚΥΡ</div>
+            <div class="wh-date">1</div>
+          </div>
+        </div>
+
+        <!-- TIME GRID -->
+        <div class="time-grid" id="timeGrid">
+          <!-- TIME LABELS & DAY COLS generated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW APPOINTMENT MODAL -->
+<div class="modal-overlay" id="apptModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Νέο Ραντεβού</div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">Πελάτης</div>
+      <select>
+        <option>Μαρία Παπαδοπούλου</option>
+        <option>Αλέξανδρος Κωστόπουλος</option>
+        <option>Ελένη Τσιώτου</option>
+        <option>Νίκος Δημητρίου</option>
+        <option>Σοφία Αντωνίου</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <div class="form-label">Τίτλος</div>
+      <input type="text" placeholder="π.χ. Επανεκτίμηση διατροφικού πλάνου">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <div class="form-label">Ημερομηνία</div>
+        <input type="date" value="2026-05-28">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Ώρα</div>
+        <input type="time" value="10:00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <div class="form-label">Διάρκεια</div>
+        <select>
+          <option>30 λεπτά</option>
+          <option selected>45 λεπτά</option>
+          <option>60 λεπτά</option>
+          <option>90 λεπτά</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Επανάληψη</div>
+        <select>
+          <option>Χωρίς επανάληψη</option>
+          <option>Εβδομαδιαία</option>
+          <option>Διμηνιαία</option>
+          <option>Μηνιαία</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">Τύπος</div>
+      <div class="type-chips">
+        <div class="tchip active">📹 Zoom</div>
+        <div class="tchip">🎥 Google Meet</div>
+        <div class="tchip">🏃 Δια ζώσης</div>
+        <div class="tchip">📞 Τηλέφωνο</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">Σημειώσεις</div>
+      <input type="text" placeholder="Προαιρετικό...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeModal()">Ακύρωση</button>
+      <button class="btn-primary" onclick="saveAppt()">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l5 5 9-9"/></svg>
+        Αποθήκευση
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// APPOINTMENTS DATA
+const appointments = [
+  // Mon 26
+  { day:0, start:9,   dur:60, name:'Ελένη Τσιώτου', type:'zoom',    label:'📹 Zoom · Πλάνο Vegan', color:'#3b82f6' },
+  { day:0, start:11,  dur:45, name:'Κώστας Νικολάου', type:'person', label:'🏃 Δια ζώσης', color:'#10b981' },
+  // Tue 27
+  { day:1, start:10,  dur:60, name:'Άννα Κaρβέλα',  type:'meet',   label:'🎥 Google Meet', color:'#8b5cf6' },
+  { day:1, start:14,  dur:45, name:'Πέτρος Σπύρου',  type:'phone',  label:'📞 Τηλέφωνο', color:'#f59e0b' },
+  // Wed 28 (TODAY)
+  { day:2, start:10,  dur:60, name:'Μαρία Παπαδοπούλου', type:'zoom', label:'📹 Zoom · Επανεκτίμηση', color:'#3b82f6' },
+  { day:2, start:12.5,dur:45, name:'Αλέξανδρος Κωστόπουλος', type:'person', label:'🏃 Δια ζώσης · Σύσταση', color:'#10b981' },
+  { day:2, start:16,  dur:60, name:'Νίκος Δημητρίου', type:'meet',  label:'🎥 Meet · Follow-up', color:'#8b5cf6' },
+  // Thu 29
+  { day:3, start:9,   dur:60, name:'Σοφία Αντωνίου', type:'zoom',   label:'📹 Zoom · Νέος πελάτης', color:'#06b6d4' },
+  { day:3, start:11,  dur:30, name:'Ελένη Τσιώτου',  type:'phone',  label:'📞 Check-in', color:'#f59e0b' },
+  { day:3, start:14,  dur:60, name:'Γιώργος Αλεξίου', type:'zoom',  label:'📹 Zoom · Μηνιαίο', color:'#3b82f6' },
+  // Fri 30
+  { day:4, start:10,  dur:45, name:'Δήμητρα Βασιλείου', type:'person', label:'🏃 Δια ζώσης', color:'#10b981' },
+  { day:4, start:15,  dur:60, name:'Ιωάννης Μαύρος', type:'zoom',   label:'📹 Zoom · 3μηνο', color:'#3b82f6' },
+];
+
+const START_HOUR = 7;
+const HOURS = 14; // 7:00 – 21:00
+const PX_PER_HOUR = 60;
+
+function buildGrid() {
+  const grid = document.getElementById('timeGrid');
+  grid.innerHTML = '';
+
+  // Build rows
+  for (let h = START_HOUR; h < START_HOUR + HOURS; h++) {
+    // Time label
+    const tl = document.createElement('div');
+    tl.className = 'time-label';
+    tl.textContent = h + ':00';
+    grid.appendChild(tl);
+
+    // Day cells
+    for (let d = 0; d < 7; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'day-col' + (d === 2 ? ' today-col' : '');
+      cell.style.height = PX_PER_HOUR + 'px';
+      cell.addEventListener('click', () => openModalAt(d, h));
+      grid.appendChild(cell);
+    }
+  }
+
+  // Place appointments
+  appointments.forEach(appt => {
+    const col = grid.querySelectorAll('.day-col');
+    // Find all cols for this day (each day appears HOURS times)
+    const dayColsStart = appt.day; // offset within row
+    // Simpler: place as absolutely positioned within the grid
+    const block = document.createElement('div');
+    block.className = 'appt-block';
+    block.style.top = ((appt.start - START_HOUR) * PX_PER_HOUR * HOURS) + 'px';
+    block.style.height = (appt.dur / 60 * PX_PER_HOUR * HOURS) + 'px';
+
+    // We'll use a different approach: overlay on top of the grid
+    block.innerHTML = `<div class="appt-time">${formatTime(appt.start)}</div><div class="appt-name">${appt.name}</div><div class="appt-type">${appt.label}</div>`;
+    block.style.background = appt.color + '18';
+    block.style.borderLeftColor = appt.color;
+    block.style.color = appt.color;
+    block.onclick = (e) => { e.stopPropagation(); openApptDetail(appt.name); };
+    block.title = appt.name;
+
+    // Place in specific day column — use absolute overlay approach
+    placeAppt(block, appt);
+  });
+}
+
+function placeAppt(block, appt) {
+  // Create a positioned wrapper overlay
+  const overlay = document.getElementById('calOverlay') || createOverlay();
+  block.style.position = 'absolute';
+  // Approximate column positions (60px time label + 7 equal columns)
+  const colWidth = (document.querySelector('.cal-main').offsetWidth - 60) / 7;
+  const left = 60 + appt.day * colWidth + 4;
+  const top = (appt.start - START_HOUR) * PX_PER_HOUR + 8; // 8px for header row top offset
+  block.style.left = left + 'px';
+  block.style.top = top + 'px';
+  block.style.width = (colWidth - 10) + 'px';
+  block.style.height = (appt.dur / 60 * PX_PER_HOUR - 4) + 'px';
+  overlay.appendChild(block);
+}
+
+function createOverlay() {
+  const timeGrid = document.getElementById('timeGrid');
+  const overlay = document.createElement('div');
+  overlay.id = 'calOverlay';
+  overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5';
+  timeGrid.style.position = 'relative';
+  timeGrid.appendChild(overlay);
+  overlay.style.pointerEvents = 'none';
+  // Allow child events
+  setTimeout(() => {
+    overlay.querySelectorAll('.appt-block').forEach(b => b.style.pointerEvents = 'all');
+  }, 100);
+  return overlay;
+}
+
+function formatTime(h) {
+  const hour = Math.floor(h);
+  const min = h % 1 === 0.5 ? '30' : '00';
+  return hour + ':' + min;
+}
+
+// NOW LINE
+function drawNowLine() {
+  const now = new Date();
+  const hours = now.getHours() + now.getMinutes() / 60;
+  if (hours < START_HOUR || hours > START_HOUR + HOURS) return;
+  const top = (hours - START_HOUR) * PX_PER_HOUR;
+  const grid = document.getElementById('timeGrid');
+  const existing = document.getElementById('nowLine');
+  if (existing) existing.remove();
+  const line = document.createElement('div');
+  line.id = 'nowLine';
+  line.style.cssText = `position:absolute;left:60px;right:0;top:${top}px;height:2px;background:var(--red);z-index:30;pointer-events:none`;
+  line.innerHTML = '<div style="position:absolute;left:-5px;top:-4px;width:10px;height:10px;background:var(--red);border-radius:50%"></div>';
+  grid.style.position = 'relative';
+  grid.appendChild(line);
+  // Scroll to now
+  const scrollTop = Math.max(0, top - 100);
+  grid.parentElement.scrollTop = scrollTop;
+}
+
+// MODAL
+function openModal() { document.getElementById('apptModal').classList.add('open'); }
+function openModalAt(day, hour) { openModal(); }
+function closeModal() { document.getElementById('apptModal').classList.remove('open'); }
+function openApptDetail(name) { /* would open detail panel */ }
+function saveAppt() {
+  closeModal();
+  // In production: POST to API, refresh grid
+}
+
+function setView(el, view) {
+  document.querySelectorAll('.vt').forEach(v => v.classList.remove('active'));
+  el.classList.add('active');
+}
+function prevWeek() {} function nextWeek() {}
+
+// Type chip selection
+document.querySelectorAll('.tchip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.tchip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Init
+buildGrid();
+drawNowLine();
+setInterval(drawNowLine, 60000);
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

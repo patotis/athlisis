@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Συνδρομή & Χρέωση</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#080c14;--bg2:#0d1220;--bg3:#111827;
+    --surface:rgba(255,255,255,.03);--surface2:rgba(255,255,255,.06);
+    --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+    --text:#f0f4ff;--text2:#8892a4;--text3:#4a5568;
+    --accent:#3b82f6;--accent2:#6366f1;--accent3:#06b6d4;
+    --green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+    --font-d:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+  .topbar{display:flex;align-items:center;gap:14px;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
+  .tb-title{font-family:var(--font-d);font-size:15px;font-weight:600;flex:1}
+  .btn-primary{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.3)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-sec{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;font-family:var(--font-d);font-weight:500;cursor:pointer;transition:all .15s}
+  .btn-sec:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+
+  .content{padding:28px;max-width:1100px;margin:0 auto}
+  .section-title{font-family:var(--font-d);font-size:20px;font-weight:800;margin-bottom:6px}
+  .section-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+
+  /* CURRENT PLAN BANNER */
+  .current-plan{
+    background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(99,102,241,.07),rgba(6,182,212,.05));
+    border:1px solid rgba(59,130,246,.2);border-radius:16px;padding:24px;margin-bottom:28px;
+    position:relative;overflow:hidden;
+  }
+  .current-plan::after{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(99,102,241,.15) 0%,transparent 70%);pointer-events:none}
+  .cp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .cp-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(99,102,241,.15));border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:5px 14px;font-size:12px;font-family:var(--font-d);font-weight:700;color:var(--accent2)}
+  .cp-name{font-family:var(--font-d);font-size:26px;font-weight:800;margin-bottom:4px}
+  .cp-price{font-family:var(--font-d);font-size:14px;color:var(--text2)}
+  .cp-price strong{font-size:20px;color:var(--text)}
+  .cp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  .cp-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center}
+  .cp-stat-val{font-family:var(--font-d);font-size:18px;font-weight:800;margin-bottom:3px}
+  .cp-stat-label{font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+  /* PLANS GRID */
+  .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+  .plan-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;position:relative;transition:all .2s;cursor:pointer}
+  .plan-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+  .plan-card.popular{border-color:rgba(99,102,241,.4);background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(59,130,246,.04))}
+  .plan-card.current-active{border-color:rgba(59,130,246,.4);background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(99,102,241,.05))}
+  .popular-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:10.5px;font-family:var(--font-d);font-weight:700;padding:4px 14px;border-radius:20px;white-space:nowrap}
+  .plan-name{font-family:var(--font-d);font-size:15px;font-weight:800;margin-bottom:6px}
+  .plan-price-row{display:flex;align-items:flex-end;gap:4px;margin-bottom:16px}
+  .plan-price{font-family:var(--font-d);font-size:36px;font-weight:800}
+  .plan-price-sub{font-size:12px;color:var(--text2);margin-bottom:6px}
+  .plan-desc{font-size:12.5px;color:var(--text2);margin-bottom:18px;line-height:1.6}
+  .plan-features{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+  .pf{display:flex;align-items:flex-start;gap:8px;font-size:12.5px}
+  .pf-check{color:var(--green);flex-shrink:0;margin-top:1px;font-size:13px}
+  .pf-cross{color:var(--text3);flex-shrink:0;margin-top:1px;font-size:13px}
+  .pf-text{color:var(--text2);line-height:1.4}
+  .pf-text.dim{color:var(--text3)}
+  .plan-btn{width:100%;padding:10px;border-radius:8px;font-family:var(--font-d);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:1px solid var(--border);background:var(--surface);color:var(--text2)}
+  .plan-btn.active-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;box-shadow:0 4px 16px rgba(59,130,246,.3)}
+  .plan-btn.active-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,130,246,.4)}
+  .plan-btn.current-btn{background:rgba(16,185,129,.12);color:var(--green);border-color:rgba(16,185,129,.3);cursor:default}
+
+  /* BILLING HISTORY */
+  .billing-table{display:flex;flex-direction:column;gap:0}
+  .bt-header{display:grid;grid-template-columns:1fr 120px 100px 80px 80px;gap:12px;padding:8px 12px;font-size:10.5px;font-family:var(--font-d);font-weight:600;color:var(--text3);border-bottom:1px solid var(--border)}
+  .bt-row{display:grid;grid-template-columns:1fr 120px 100px 80px 80px;gap:12px;padding:12px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;cursor:pointer}
+  .bt-row:last-child{border-bottom:none}
+  .bt-row:hover{background:var(--surface)}
+  .bt-desc{font-size:13px;font-weight:500}
+  .bt-date{font-size:12px;color:var(--text2)}
+  .bt-amount{font-size:13px;font-family:var(--font-d);font-weight:700;color:var(--green)}
+  .bt-status{font-size:10.5px;font-family:var(--font-d);font-weight:600;padding:3px 8px;border-radius:20px}
+  .st-paid{background:rgba(16,185,129,.12);color:var(--green)}
+  .st-pending{background:rgba(245,158,11,.1);color:var(--orange)}
+  .bt-dl{color:var(--accent);font-size:12px;cursor:pointer}
+
+  /* USAGE METERS */
+  .usage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+  .um-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .um-header{display:flex;justify-content:space-between;margin-bottom:10px;font-size:12px}
+  .um-label{color:var(--text2);font-weight:500}
+  .um-val{font-family:var(--font-d);font-weight:700;color:var(--text)}
+  .um-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:6px}
+  .um-fill{height:100%;border-radius:4px;transition:width 1s ease}
+  .um-sub{font-size:11px;color:var(--text3)}
+
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .card-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text2)}
+
+  @media(max-width:800px){.plans-grid{grid-template-columns:1fr}.usage-grid{grid-template-columns:1fr 1fr}.cp-stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-title">Συνδρομή & Χρέωση</div>
+  <button class="btn-sec">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 17H5a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v7a2 2 0 01-2 2z"/><path d="M13 3v5h5"/></svg>
+    Ιστορικό Τιμολογίων
+  </button>
+  <button class="btn-primary" onclick="openPortal()">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2a6 6 0 100 12A6 6 0 0010 2zM2 18a8 8 0 0116 0"/></svg>
+    Διαχείριση Stripe
+  </button>
+</div>
+
+<div class="content">
+
+  <!-- CURRENT PLAN -->
+  <div class="current-plan">
+    <div class="cp-top">
+      <div>
+        <div class="cp-badge">✦ Τρέχουσα Συνδρομή</div>
+        <div class="cp-name" style="margin-top:10px">Professional</div>
+        <div class="cp-price"><strong>€49</strong> / μήνα · Ανανεώνεται 28 Ιουνίου 2026</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sec" onclick="cancelSub()">Ακύρωση</button>
+        <button class="btn-primary" onclick="upgrade()">Αναβάθμιση σε Clinic →</button>
+      </div>
+    </div>
+    <div class="cp-stats">
+      <div class="cp-stat">
+        <div class="cp-stat-val" style="color:var(--accent)">28<span style="font-size:13px;color:var(--text3)">/∞</span></div>
+        <div class="cp-stat-label">Ενεργοί Πελάτες</div>
+      </div>
+      <div class="cp-stat">
+        <div class="cp-stat-val" style="color:var(--accent2)">57<span style="font-size:13px;color:var(--text3)">/150</span></div>
+        <div class="cp-stat-label">AI Calls Μήνα</div>
+      </div>
+      <div class="cp-stat">
+        <div class="cp-stat-val" style="color:var(--green)">42<span style="font-size:13px;color:var(--text3)">/∞</span></div>
+        <div class="cp-stat-label">Ραντεβού Μήνα</div>
+      </div>
+      <div class="cp-stat">
+        <div class="cp-stat-val" style="color:var(--orange)">1<span style="font-size:13px;color:var(--text3)">/1</span></div>
+        <div class="cp-stat-label">Επαγγελματίες</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USAGE METERS -->
+  <div class="usage-grid">
+    <div class="um-card">
+      <div class="um-header"><span class="um-label">AI Calls</span><span class="um-val">57 / 150</span></div>
+      <div class="um-track"><div class="um-fill" style="width:38%;background:linear-gradient(90deg,var(--accent2),var(--accent3))"></div></div>
+      <div class="um-sub">38% χρήση · Ανανεώνεται 28/6</div>
+    </div>
+    <div class="um-card">
+      <div class="um-header"><span class="um-label">Αποθηκευτικός Χώρος</span><span class="um-val">2.4 / 10 GB</span></div>
+      <div class="um-track"><div class="um-fill" style="width:24%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+      <div class="um-sub">24% πλήρης · 7.6 GB διαθέσιμα</div>
+    </div>
+    <div class="um-card">
+      <div class="um-header"><span class="um-label">PDF Εξαγωγές</span><span class="um-val">28 / ∞</span></div>
+      <div class="um-track"><div class="um-fill" style="width:100%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+      <div class="um-sub">Απεριόριστες στο Professional</div>
+    </div>
+  </div>
+
+  <!-- PLANS -->
+  <div class="section-title">Αλλαγή Πλάνου</div>
+  <div class="section-sub">Αναβαθμίσου οποιαδήποτε στιγμή. Η αλλαγή εφαρμόζεται άμεσα.</div>
+
+  <div class="plans-grid">
+    <!-- STARTER -->
+    <div class="plan-card" onclick="selectPlan('starter')">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price-row">
+        <div class="plan-price">€0</div>
+        <div class="plan-price-sub">/ μήνα</div>
+      </div>
+      <div class="plan-desc">Για νέους επαγγελματίες που ξεκινούν. Βασικά εργαλεία χωρίς κόστος.</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">Έως 10 ενεργούς πελάτες</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">5 AI plans / μήνα</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">Βασικό ημερολόγιο</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">1 GB αποθηκευτικός χώρος</span></div>
+        <div class="pf"><span class="pf-cross">✗</span><span class="pf-text dim">AI Photo Analysis</span></div>
+        <div class="pf"><span class="pf-cross">✗</span><span class="pf-text dim">Branded PDF</span></div>
+        <div class="pf"><span class="pf-cross">✗</span><span class="pf-text dim">Stripe Πληρωμές</span></div>
+      </div>
+      <button class="plan-btn">Υποβάθμιση</button>
+    </div>
+
+    <!-- PROFESSIONAL (CURRENT) -->
+    <div class="plan-card current-active popular">
+      <div class="popular-badge">✦ Τρέχον Πλάνο</div>
+      <div class="plan-name" style="margin-top:8px">Professional</div>
+      <div class="plan-price-row">
+        <div class="plan-price" style="color:var(--accent)">€49</div>
+        <div class="plan-price-sub">/ μήνα</div>
+      </div>
+      <div class="plan-desc">Για ανεξάρτητους επαγγελματίες. Πλήρεις AI δυνατότητες, απεριόριστοι πελάτες.</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text"><strong>Απεριόριστοι</strong> πελάτες</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">150 AI plans / μήνα</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">AI Photo Analysis</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">Branded PDF εξαγωγές</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">Stripe Πληρωμές πελατών</span></div>
+        <div class="pf"><span class="pf-check">✓</span><span class="pf-text">10 GB αποθηκευτικός χώρος</span></div>
+        <div class="pf"><span class="pf-cross">✗</span><span class="pf-text dim">Custom domain</span></div>
+        <div class="pf"><span class="pf-cross">✗</span><span class="pf-text dim">White-label mobile app</span></div>
+      </div>
+      <button class="plan-btn current-btn">✓ Ενεργό Πλάνο</button>
+    </div>
+
+    <!-- CLINIC -->
+    <div class="plan-card" onclick="selectPlan('clinic')">
+      <div class="plan-name">Clinic</div>
+      <div class="plan-price-row">
+        <div class="plan-price" style="color:var(--purple)">€149</div>
+        <div class="plan-price-sub">/ μήνα</div>
+      </div>
+      <div class="plan-desc">Για κλινικές και ομάδες. White-label, custom domain, απεριόριστο AI.</div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text"><strong>Έως 10</strong> επαγγελματίες</span></div>
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text"><strong>Απεριόριστο</strong> AI</span></div>
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text">Custom domain</span></div>
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text">White-label mobile app</span></div>
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text">100 GB αποθηκευτικός χώρος</span></div>
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text">Priority support (SLA 4ω)</span></div>
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text">Onboarding specialist</span></div>
+        <div class="pf"><span class="pf-check" style="color:var(--purple)">✓</span><span class="pf-text">HIPAA Business Associate Agreement</span></div>
+      </div>
+      <button class="plan-btn active-btn" style="background:linear-gradient(135deg,var(--purple),var(--accent2))">Αναβάθμιση →</button>
+    </div>
+  </div>
+
+  <!-- BILLING HISTORY -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Ιστορικό Χρεώσεων</span>
+      <button class="btn-sec" style="font-size:12px;padding:6px 12px">Export CSV</button>
+    </div>
+    <div class="billing-table">
+      <div class="bt-header">
+        <span>Περιγραφή</span>
+        <span>Ημερομηνία</span>
+        <span>Ποσό</span>
+        <span>Κατάσταση</span>
+        <span>PDF</span>
+      </div>
+      <div class="bt-row">
+        <div class="bt-desc">Athlisis Professional — Μάιος 2026</div>
+        <div class="bt-date">28/05/2026</div>
+        <div class="bt-amount">€49.00</div>
+        <span class="bt-status st-paid">Πληρώθηκε</span>
+        <span class="bt-dl">↓ PDF</span>
+      </div>
+      <div class="bt-row">
+        <div class="bt-desc">Athlisis Professional — Απρίλιος 2026</div>
+        <div class="bt-date">28/04/2026</div>
+        <div class="bt-amount">€49.00</div>
+        <span class="bt-status st-paid">Πληρώθηκε</span>
+        <span class="bt-dl">↓ PDF</span>
+      </div>
+      <div class="bt-row">
+        <div class="bt-desc">Athlisis Professional — Μάρτιος 2026</div>
+        <div class="bt-date">28/03/2026</div>
+        <div class="bt-amount">€49.00</div>
+        <span class="bt-status st-paid">Πληρώθηκε</span>
+        <span class="bt-dl">↓ PDF</span>
+      </div>
+      <div class="bt-row">
+        <div class="bt-desc">Athlisis Professional — Φεβρουάριος 2026</div>
+        <div class="bt-date">28/02/2026</div>
+        <div class="bt-amount">€49.00</div>
+        <span class="bt-status st-paid">Πληρώθηκε</span>
+        <span class="bt-dl">↓ PDF</span>
+      </div>
+      <div class="bt-row">
+        <div class="bt-desc">Athlisis Starter — Ιανουάριος 2026</div>
+        <div class="bt-date">28/01/2026</div>
+        <div class="bt-amount">€0.00</div>
+        <span class="bt-status" style="background:rgba(255,255,255,.05);color:var(--text3)">Δωρεάν</span>
+        <span class="bt-dl" style="color:var(--text3)">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENT METHOD -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Μέθοδος Πληρωμής</span>
+      <button class="btn-sec" style="font-size:12px;padding:6px 12px">Αλλαγή</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px">
+      <div style="width:48px;height:32px;background:linear-gradient(135deg,#1a1f6e,#2563eb);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;font-family:var(--font-d);letter-spacing:.5px">VISA</div>
+      <div>
+        <div style="font-size:13px;font-weight:500">Visa •••• •••• •••• 4242</div>
+        <div style="font-size:11.5px;color:var(--text2)">Λήγει 12/2028 · Προεπιλεγμένη</div>
+      </div>
+      <span style="margin-left:auto;font-size:10.5px;font-family:var(--font-d);font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(16,185,129,.12);color:var(--green)">Ενεργή</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectPlan(plan) {
+  if(plan==='clinic') {
+    if(confirm('Αναβάθμιση σε Clinic Plan (€149/μήνα); Η χρέωση θα γίνει άμεσα.')) {
+      alert('Ανακατεύθυνση στη Stripe Checkout...');
+    }
+  }
+}
+function openPortal() { alert('Ανακατεύθυνση στο Stripe Customer Portal...'); }
+function upgrade() { selectPlan('clinic'); }
+function cancelSub() {
+  if(confirm('Ακύρωση συνδρομής; Θα παραμείνεις στο Professional έως τέλος κύκλου (28/6).')) {
+    alert('Η συνδρομή θα ακυρωθεί στο τέλος της περιόδου.');
+  }
+}
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.um-fill').forEach(f=>{
+    const w=f.style.width; f.style.width='0';
+    setTimeout(()=>f.style.width=w,300);
+  });
+});
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

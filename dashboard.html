@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080c14;
+    --bg2: #0d1220;
+    --bg3: #111827;
+    --surface: rgba(255,255,255,0.03);
+    --surface2: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f4ff;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --accent: #3b82f6;
+    --accent2: #6366f1;
+    --accent3: #06b6d4;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --glow: rgba(59,130,246,0.15);
+    --sidebar-w: 240px;
+    --font-display: 'Syne', sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* LAYOUT */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .sidebar::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .logo {
+    padding: 28px 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 14px;
+    color: white;
+    box-shadow: 0 0 20px rgba(99,102,241,0.4);
+  }
+  .logo-text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.3px;
+    background: linear-gradient(90deg, var(--text), var(--text2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .logo-badge {
+    margin-left: auto;
+    font-size: 9px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    padding: 2px 7px;
+    border-radius: 20px;
+    color: white;
+    -webkit-text-fill-color: white;
+  }
+
+  .nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+
+  .nav-section-label {
+    font-size: 9px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    color: var(--text3);
+    padding: 8px 12px 4px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text2);
+    font-size: 13.5px;
+    font-weight: 400;
+    position: relative;
+    margin-bottom: 1px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.1));
+    color: var(--text);
+    border: 1px solid rgba(99,102,241,0.2);
+  }
+  .nav-item.active .nav-icon { color: var(--accent); }
+  .nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .nav-badge.green { background: var(--green); }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .user-card:hover { background: var(--surface2); }
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white;
+    font-family: var(--font-display);
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    gap: 16px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(20px);
+  }
+  .topbar-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; flex: 1; }
+  .topbar-subtitle { font-size: 12px; color: var(--text2); font-weight: 400; margin-top: 1px; }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    width: 220px;
+    transition: all 0.2s;
+  }
+  .search-bar:hover { border-color: var(--border2); }
+  .search-bar input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-size: 13px;
+    font-family: var(--font-body); width: 100%;
+  }
+  .search-bar input::placeholder { color: var(--text3); }
+
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text2);
+    position: relative;
+  }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+  .notif-dot {
+    position: absolute;
+    top: 7px; right: 7px;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 1.5px solid var(--bg2);
+  }
+
+  .btn-primary {
+    display: flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+    white-space: nowrap;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59,130,246,0.4); }
+
+  /* CONTENT */
+  .content { padding: 24px 28px; flex: 1; }
+
+  /* GREETING BANNER */
+  .greeting {
+    background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.05) 50%, rgba(6,182,212,0.04) 100%);
+    border: 1px solid rgba(59,130,246,0.12);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .greeting::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .greeting-eyebrow {
+    font-size: 11px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .greeting-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .greeting-title em { font-family: var(--font-serif); font-style: italic; color: var(--accent3); font-weight: 400; }
+  .greeting-sub { font-size: 13px; color: var(--text2); }
+  .greeting-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 18px;
+  }
+  .gstat { display: flex; flex-direction: column; gap: 2px; }
+  .gstat-val { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+  .gstat-val.blue { color: var(--accent); }
+  .gstat-val.green { color: var(--green); }
+  .gstat-val.orange { color: var(--orange); }
+  .gstat-label { font-size: 11px; color: var(--text2); }
+  .gstat-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+  /* GRID */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .grid-2b { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text2); letter-spacing: 0.2px; }
+  .card-action { font-size: 11.5px; color: var(--accent); cursor: pointer; transition: opacity 0.15s; }
+  .card-action:hover { opacity: 0.8; }
+
+  /* STAT CARDS */
+  .stat-card { padding: 18px 20px; }
+  .stat-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .stat-icon.blue { background: rgba(59,130,246,0.12); color: var(--accent); }
+  .stat-icon.green { background: rgba(16,185,129,0.12); color: var(--green); }
+  .stat-icon.orange { background: rgba(245,158,11,0.12); color: var(--orange); }
+  .stat-icon.purple { background: rgba(139,92,246,0.12); color: var(--purple); }
+  .stat-val { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+  .stat-delta { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--red); }
+
+  /* MINI CHART (CSS bars) */
+  .mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 36px; margin-top: 12px; }
+  .bar { flex: 1; border-radius: 2px; background: var(--accent); opacity: 0.3; transition: opacity 0.2s; }
+  .bar:hover { opacity: 0.7; }
+  .bar.active { opacity: 0.8; }
+
+  /* SPARKLINE (SVG) */
+  .sparkline { margin-top: 8px; }
+
+  /* CLIENT LIST */
+  .client-list { display: flex; flex-direction: column; gap: 0; }
+  .client-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 4px;
+  }
+  .client-row:last-child { border-bottom: none; }
+  .client-row:hover { background: var(--surface); padding-left: 8px; padding-right: 8px; margin: 0 -8px; }
+  .client-av {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    font-family: var(--font-display);
+    color: white;
+  }
+  .client-info { flex: 1; min-width: 0; }
+  .client-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .client-meta { font-size: 11px; color: var(--text2); }
+  .client-status {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .status-active { background: rgba(16,185,129,0.12); color: var(--green); }
+  .status-pending { background: rgba(245,158,11,0.12); color: var(--orange); }
+  .status-inactive { background: rgba(239,68,68,0.1); color: var(--red); }
+
+  /* APPOINTMENTS */
+  .appt-list { display: flex; flex-direction: column; gap: 8px; }
+  .appt-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .appt-item:hover { background: var(--surface2); border-color: var(--border2); }
+  .appt-time-block {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-width: 44px;
+    background: rgba(59,130,246,0.1);
+    border-radius: 6px;
+    padding: 6px 4px;
+  }
+  .appt-hour { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .appt-min { font-size: 10px; color: var(--accent); opacity: 0.7; }
+  .appt-info { flex: 1; }
+  .appt-name { font-size: 13px; font-weight: 500; }
+  .appt-type { font-size: 11px; color: var(--text2); }
+  .appt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* AI INSIGHTS */
+  .ai-card {
+    background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(59,130,246,0.05) 100%);
+    border: 1px solid rgba(99,102,241,0.2);
+  }
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10.5px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--accent2);
+    letter-spacing: 0.3px;
+    margin-bottom: 12px;
+  }
+  .ai-pulse {
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  .ai-insights-list { display: flex; flex-direction: column; gap: 8px; }
+  .ai-insight {
+    display: flex; gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .ai-insight-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .ai-insight-text { color: var(--text2); }
+  .ai-insight-text strong { color: var(--text); font-weight: 500; }
+
+  /* MEAL PLAN PREVIEW */
+  .meal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .meal-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .meal-label { font-size: 10px; font-family: var(--font-display); font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .meal-name { font-size: 12px; color: var(--text); font-weight: 500; margin-bottom: 6px; }
+  .meal-macros { display: flex; gap: 6px; flex-wrap: wrap; }
+  .macro-tag { font-size: 10px; color: var(--text3); background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
+  .macro-tag.p { color: #60a5fa; background: rgba(96,165,250,0.1); }
+  .macro-tag.c { color: #34d399; background: rgba(52,211,153,0.1); }
+  .macro-tag.f { color: #fbbf24; background: rgba(251,191,36,0.1); }
+
+  /* PROGRESS RING */
+  .progress-rings { display: flex; gap: 20px; justify-content: center; padding: 8px 0; }
+  .ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .ring-label { font-size: 11px; color: var(--text2); text-align: center; }
+  .ring-val { font-family: var(--font-display); font-size: 13px; font-weight: 700; }
+
+  /* REVENUE CHART BARS */
+  .rev-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; padding: 0 4px; }
+  .rev-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .rev-bar { width: 100%; border-radius: 4px 4px 0 0; background: linear-gradient(to top, var(--accent), var(--accent2)); opacity: 0.6; transition: opacity 0.2s; min-height: 4px; }
+  .rev-bar:hover { opacity: 1; }
+  .rev-bar.current { opacity: 1; box-shadow: 0 -4px 12px rgba(59,130,246,0.4); }
+  .rev-month { font-size: 9px; color: var(--text3); }
+
+  /* ACTIVITY FEED */
+  .feed-list { display: flex; flex-direction: column; }
+  .feed-item {
+    display: flex; gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .feed-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .feed-dot.blue { background: var(--accent); }
+  .feed-dot.green { background: var(--green); }
+  .feed-dot.orange { background: var(--orange); }
+  .feed-dot.purple { background: var(--purple); }
+  .feed-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .feed-text strong { color: var(--text); font-weight: 500; }
+  .feed-time { font-size: 10.5px; color: var(--text3); white-space: nowrap; margin-left: auto; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 3px; margin-bottom: 16px; }
+  .tab {
+    flex: 1; text-align: center;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+  .tab.active { background: var(--bg3); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+  /* TAG */
+  .tag {
+    display: inline-flex; align-items: center;
+    font-size: 10.5px; font-family: var(--font-display); font-weight: 600;
+    padding: 2px 8px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tag.blue { background: rgba(59,130,246,0.12); color: var(--accent); border: 1px solid rgba(59,130,246,0.2); }
+  .tag.green { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+  .tag.orange { background: rgba(245,158,11,0.1); color: var(--orange); border: 1px solid rgba(245,158,11,0.2); }
+
+  /* CALORIE PROGRESS BAR */
+  .cal-bar-wrap { margin: 8px 0; }
+  .cal-bar-header { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text2); margin-bottom: 5px; }
+  .cal-bar-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .cal-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transition: width 1s ease; }
+
+  /* ADHERENCE SCORE */
+  .adh-score {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 800;
+    text-align: center;
+    padding: 8px 0 0;
+    background: linear-gradient(135deg, var(--green), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .adh-label { text-align: center; font-size: 11px; color: var(--text2); margin-bottom: 12px; }
+
+  /* WATERMARK */
+  .powered {
+    position: fixed;
+    bottom: 12px; right: 16px;
+    font-size: 10px;
+    color: var(--text3);
+    pointer-events: none;
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .greeting { animation: fadeUp 0.35s ease both; }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+    margin-top: 4px;
+  }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  svg { fill: currentColor; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-2b { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">A</div>
+      <span class="logo-text">Athlisis</span>
+      <span class="logo-badge">PRO</span>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section-label">Κύρια</div>
+
+      <div class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>
+        Dashboard
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3.5"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6"/></svg>
+        Πελάτες
+        <span class="nav-badge green">28</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M7 2v4M13 2v4M3 9h14"/></svg>
+        Ραντεβού
+        <span class="nav-badge">3</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V9m-9 4h4m-4-3h2m5-8l-5 5"/></svg>
+        Διατροφικά Πλάνα
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h12M4 10h8M4 14h6"/></svg>
+        Προγράμματα
+      </div>
+
+      <div class="nav-section-label" style="margin-top:12px">AI & Ανάλυση</div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 7v3l2 2"/></svg>
+        AI Assistant
+        <div style="width:6px;height:6px;background:var(--accent2);border-radius:50%;margin-left:auto;animation:pulse 2s infinite"></div>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 17 7 11 11 14 15 7 17 9"/><path d="M3 17h14"/></svg>
+        Αναλυτικά
+      </div>
+
+      <div class="nav-section-label" style="margin-top:12px">Επικοινωνία</div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v7a2 2 0 01-2 2H7l-4 3V5z"/></svg>
+        Μηνύματα
+        <span class="nav-badge">7</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 17H5a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v7a2 2 0 01-2 2z"/><path d="M13 3v5h5"/></svg>
+        Αναφορές
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.636 5.636l1.414 1.414M12.95 12.95l1.414 1.414M5.636 14.364l1.414-1.414M12.95 7.05l1.414-1.414"/></svg>
+        Ρυθμίσεις
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">ΔΚ</div>
+        <div class="user-info">
+          <div class="user-name">Δρ. Κωνσταντίνου</div>
+          <div class="user-role">Διαιτολόγος • Professional</div>
+        </div>
+        <svg style="color:var(--text3);flex-shrink:0" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-subtitle">Κυριακή 24 Μαΐου 2026</div>
+      </div>
+
+      <div class="search-bar">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="var(--text3)" stroke-width="1.5"><circle cx="9" cy="9" r="5.5"/><path d="M15 15l3 3"/></svg>
+        <input type="text" placeholder="Αναζήτηση πελάτη...">
+      </div>
+
+      <div class="topbar-actions">
+        <div class="icon-btn">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2a6 6 0 00-6 6c0 4-2 5-2 5h16s-2-1-2-5a6 6 0 00-6-6zM7.5 17a2.5 2.5 0 005 0"/></svg>
+          <div class="notif-dot"></div>
+        </div>
+        <div class="icon-btn">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2"/></svg>
+        </div>
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5v10M5 10h10"/></svg>
+          Νέο Πλάνο
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- GREETING -->
+      <div class="greeting">
+        <div class="greeting-eyebrow">✦ Καλημέρα</div>
+        <div class="greeting-title">Γεια σου, <em>Δρ. Κωνσταντίνου</em> 👋</div>
+        <div class="greeting-sub">Έχεις 3 ραντεβού σήμερα και 2 πελάτες που περιμένουν νέο πλάνο. Η εβδομάδα ξεκινά δυνατά.</div>
+        <div class="greeting-stats">
+          <div class="gstat">
+            <span class="gstat-val blue">28</span>
+            <span class="gstat-label">Ενεργοί Πελάτες</span>
+          </div>
+          <div class="gstat-divider"></div>
+          <div class="gstat">
+            <span class="gstat-val green">87%</span>
+            <span class="gstat-label">Μέση Συμμόρφωση</span>
+          </div>
+          <div class="gstat-divider"></div>
+          <div class="gstat">
+            <span class="gstat-val orange">€4.9K</span>
+            <span class="gstat-label">Έσοδα Μήνα</span>
+          </div>
+          <div class="gstat-divider"></div>
+          <div class="gstat">
+            <span class="gstat-val" style="color:var(--purple)">3</span>
+            <span class="gstat-label">Σήμερα Ραντεβού</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP STATS -->
+      <div class="section-label">Επισκόπηση</div>
+      <div class="grid-3">
+
+        <div class="card stat-card">
+          <div class="stat-icon blue">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3.5"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6"/></svg>
+          </div>
+          <div class="stat-val">28</div>
+          <div class="stat-label">Πελάτες (Μήνας)</div>
+          <div class="stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5l7 7M3 12l7-7"/></svg>
+            +4 από τον προηγούμενο μήνα
+          </div>
+          <div class="mini-chart">
+            <div class="bar" style="height:40%"></div>
+            <div class="bar" style="height:60%"></div>
+            <div class="bar" style="height:45%"></div>
+            <div class="bar" style="height:70%"></div>
+            <div class="bar" style="height:55%"></div>
+            <div class="bar" style="height:80%"></div>
+            <div class="bar active" style="height:95%"></div>
+          </div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-icon green">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l5 5 9-9"/></svg>
+          </div>
+          <div class="stat-val">87<span style="font-size:16px;color:var(--text2)">%</span></div>
+          <div class="stat-label">Συμμόρφωση Πλάνου</div>
+          <div class="stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5l7 7M3 12l7-7"/></svg>
+            +5% αυτή την εβδομάδα
+          </div>
+          <div class="cal-bar-wrap" style="margin-top:12px">
+            <div class="cal-bar-track"><div class="cal-bar-fill" style="width:87%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+          </div>
+          <div style="font-size:10.5px;color:var(--text3);margin-top:4px">24/28 πελάτες ακολουθούν το πλάνο τους</div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-icon orange">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M3 10h14"/><circle cx="10" cy="10" r="7"/></svg>
+          </div>
+          <div class="stat-val">€4.9K</div>
+          <div class="stat-label">Έσοδα Μαΐου</div>
+          <div class="stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5l7 7M3 12l7-7"/></svg>
+            +18% vs Απρίλιος
+          </div>
+          <div class="rev-chart" style="margin-top:12px">
+            <div class="rev-bar-wrap"><div class="rev-bar" style="height:55%"></div><div class="rev-month">Ιαν</div></div>
+            <div class="rev-bar-wrap"><div class="rev-bar" style="height:40%"></div><div class="rev-month">Φεβ</div></div>
+            <div class="rev-bar-wrap"><div class="rev-bar" style="height:65%"></div><div class="rev-month">Μαρ</div></div>
+            <div class="rev-bar-wrap"><div class="rev-bar" style="height:72%"></div><div class="rev-month">Απρ</div></div>
+            <div class="rev-bar-wrap"><div class="rev-bar current" style="height:90%"></div><div class="rev-month" style="color:var(--accent)">Μαι</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MAIN 2-COL -->
+      <div class="grid-2">
+
+        <!-- LEFT: CLIENTS + APPOINTMENTS -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- CLIENTS -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Πρόσφατοι Πελάτες</span>
+              <span class="card-action">Όλοι →</span>
+            </div>
+            <div class="tabs">
+              <div class="tab active">Ενεργοί</div>
+              <div class="tab">Σε αναμονή</div>
+              <div class="tab">Αρχείο</div>
+            </div>
+            <div class="client-list">
+              <div class="client-row">
+                <div class="client-av" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">ΜΠ</div>
+                <div class="client-info">
+                  <div class="client-name">Μαρία Παπαδοπούλου</div>
+                  <div class="client-meta">Διαβήτης Τ2 • Απώλεια βάρους • 3 μήνες</div>
+                </div>
+                <span class="client-status status-active">Ενεργή</span>
+              </div>
+              <div class="client-row">
+                <div class="client-av" style="background:linear-gradient(135deg,#10b981,#06b6d4)">ΑΚ</div>
+                <div class="client-info">
+                  <div class="client-name">Αλέξανδρος Κωστόπουλος</div>
+                  <div class="client-meta">Μυϊκή ανάπτυξη • Keto • 1 μήνας</div>
+                </div>
+                <span class="client-status status-active">Ενεργός</span>
+              </div>
+              <div class="client-row">
+                <div class="client-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">ΕΤ</div>
+                <div class="client-info">
+                  <div class="client-name">Ελένη Τσιώτου</div>
+                  <div class="client-meta">Vegan • Αθλητική απόδοση • 5 μήνες</div>
+                </div>
+                <span class="client-status status-pending">Ανανέωση</span>
+              </div>
+              <div class="client-row">
+                <div class="client-av" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">ΝΔ</div>
+                <div class="client-info">
+                  <div class="client-name">Νίκος Δημητρίου</div>
+                  <div class="client-meta">Μεσογειακή δίαιτα • Καρδιαγγειακά • 8 μήνες</div>
+                </div>
+                <span class="client-status status-active">Ενεργός</span>
+              </div>
+              <div class="client-row">
+                <div class="client-av" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">ΣΑ</div>
+                <div class="client-info">
+                  <div class="client-name">Σοφία Αντωνίου</div>
+                  <div class="client-meta">Intermittent fasting • Hormonal • 2 μήνες</div>
+                </div>
+                <span class="client-status status-active">Ενεργή</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- APPOINTMENTS -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Σημερινά Ραντεβού</span>
+              <span class="card-action">Ημερολόγιο →</span>
+            </div>
+            <div class="appt-list">
+              <div class="appt-item">
+                <div class="appt-time-block">
+                  <span class="appt-hour">10</span>
+                  <span class="appt-min">:00</span>
+                </div>
+                <div class="appt-info">
+                  <div class="appt-name">Μαρία Παπαδοπούλου</div>
+                  <div class="appt-type">Επανεκτίμηση διατροφικού πλάνου • Zoom</div>
+                </div>
+                <span class="tag blue">Zoom</span>
+                <div class="appt-dot" style="background:var(--accent)"></div>
+              </div>
+              <div class="appt-item">
+                <div class="appt-time-block">
+                  <span class="appt-hour">12</span>
+                  <span class="appt-min">:30</span>
+                </div>
+                <div class="appt-info">
+                  <div class="appt-name">Αλέξανδρος Κωστόπουλος</div>
+                  <div class="appt-type">Αξιολόγηση σωματικής σύστασης</div>
+                </div>
+                <span class="tag green">Δια ζώσης</span>
+                <div class="appt-dot" style="background:var(--green)"></div>
+              </div>
+              <div class="appt-item">
+                <div class="appt-time-block" style="background:rgba(139,92,246,0.1)">
+                  <span class="appt-hour" style="color:var(--purple)">16</span>
+                  <span class="appt-min" style="color:var(--purple)">:00</span>
+                </div>
+                <div class="appt-info">
+                  <div class="appt-name">Νίκος Δημητρίου</div>
+                  <div class="appt-type">Follow-up εξέταση αίματος • Google Meet</div>
+                </div>
+                <span class="tag" style="background:rgba(139,92,246,0.1);color:var(--purple);border-color:rgba(139,92,246,0.2)">Meet</span>
+                <div class="appt-dot" style="background:var(--purple)"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- AI INSIGHTS -->
+          <div class="card ai-card">
+            <div class="card-header">
+              <span class="card-title">AI Insights</span>
+              <span class="card-action">Λεπτομέρειες →</span>
+            </div>
+            <div class="ai-badge">
+              <div class="ai-pulse"></div>
+              Athlisis AI • Ενεργό
+            </div>
+            <div class="ai-insights-list">
+              <div class="ai-insight">
+                <span class="ai-insight-icon">⚠️</span>
+                <span class="ai-insight-text"><strong>Ελένη Τσιώτου</strong> δεν έχει καταγράψει γεύμα εδώ και 3 μέρες. Υψηλός κίνδυνος εγκατάλειψης πλάνου.</span>
+              </div>
+              <div class="ai-insight">
+                <span class="ai-insight-icon">🎯</span>
+                <span class="ai-insight-text"><strong>Αλέξανδρος</strong> έφτασε στόχο βάρους +2.1kg μυϊκής μάζας. Προτεινόμενη αναπροσαρμογή πρωτεΐνης.</span>
+              </div>
+              <div class="ai-insight">
+                <span class="ai-insight-icon">📊</span>
+                <span class="ai-insight-text">Η μέση ενεργειακή πρόσληψη των πελατών σου είναι <strong>94% στόχου</strong> αυτή την εβδομάδα.</span>
+              </div>
+              <div class="ai-insight">
+                <span class="ai-insight-icon">💡</span>
+                <span class="ai-insight-text">Βέλτιστη ώρα αποστολής follow-up για <strong>Μαρία</strong>: σήμερα 14:00–16:00.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEAL PLAN PREVIEW -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Τελευταίο AI Πλάνο</span>
+              <span class="card-action">Δες πλήρες →</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <div class="client-av" style="width:26px;height:26px;font-size:10px;background:linear-gradient(135deg,#3b82f6,#6366f1)">ΜΠ</div>
+              <span style="font-size:12px;color:var(--text2)">Μαρία Παπαδοπούλου</span>
+              <span class="tag green" style="margin-left:auto">1750 kcal</span>
+            </div>
+            <div class="meal-grid">
+              <div class="meal-item">
+                <div class="meal-label">Πρωινό</div>
+                <div class="meal-name">Βρώμη & μύρτιλα</div>
+                <div class="meal-macros">
+                  <span class="macro-tag p">P 12g</span>
+                  <span class="macro-tag c">C 45g</span>
+                  <span class="macro-tag f">F 8g</span>
+                </div>
+              </div>
+              <div class="meal-item">
+                <div class="meal-label">Μεσημεριανό</div>
+                <div class="meal-name">Κοτόπουλο & κινόα</div>
+                <div class="meal-macros">
+                  <span class="macro-tag p">P 38g</span>
+                  <span class="macro-tag c">C 42g</span>
+                  <span class="macro-tag f">F 12g</span>
+                </div>
+              </div>
+              <div class="meal-item">
+                <div class="meal-label">Βραδινό</div>
+                <div class="meal-name">Σολομός & λαχανικά</div>
+                <div class="meal-macros">
+                  <span class="macro-tag p">P 34g</span>
+                  <span class="macro-tag c">C 22g</span>
+                  <span class="macro-tag f">F 18g</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <div class="cal-bar-wrap">
+                <div class="cal-bar-header">
+                  <span>Πρωτεΐνη</span><span style="color:var(--text)">84g / 95g</span>
+                </div>
+                <div class="cal-bar-track"><div class="cal-bar-fill" style="width:88%;background:linear-gradient(90deg,#60a5fa,#818cf8)"></div></div>
+              </div>
+              <div class="cal-bar-wrap">
+                <div class="cal-bar-header">
+                  <span>Υδατάνθρακες</span><span style="color:var(--text)">165g / 180g</span>
+                </div>
+                <div class="cal-bar-track"><div class="cal-bar-fill" style="width:92%;background:linear-gradient(90deg,#34d399,#06b6d4)"></div></div>
+              </div>
+              <div class="cal-bar-wrap">
+                <div class="cal-bar-header">
+                  <span>Λίπη</span><span style="color:var(--text)">52g / 60g</span>
+                </div>
+                <div class="cal-bar-track"><div class="cal-bar-fill" style="width:87%;background:linear-gradient(90deg,#fbbf24,#f97316)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADHERENCE SCORE -->
+          <div class="card" style="text-align:center">
+            <div class="card-header">
+              <span class="card-title">Βαθμολογία Συμμόρφωσης</span>
+              <span class="card-action">Ανάλυση →</span>
+            </div>
+            <div class="adh-score">87</div>
+            <div class="adh-label">Μέσος όρος / 100 — Εξαιρετικό 🌟</div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+              <span class="tag green">Διατροφή 91%</span>
+              <span class="tag blue">Υδάτωση 84%</span>
+              <span class="tag orange">Ύπνος 79%</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ACTIVITY FEED -->
+      <div class="section-label">Πρόσφατη Δραστηριότητα</div>
+      <div class="grid-2b">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Live Feed</span>
+            <span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+          </div>
+          <div class="feed-list">
+            <div class="feed-item">
+              <div class="feed-dot blue"></div>
+              <div class="feed-text"><strong>Μαρία Παπαδοπούλου</strong> κατέγραψε το πρωινό της — 380 kcal</div>
+              <div class="feed-time">2λ πριν</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot green"></div>
+              <div class="feed-text"><strong>Αλέξανδρος Κωστόπουλος</strong> ολοκλήρωσε προπόνηση — Upper Body</div>
+              <div class="feed-time">18λ πριν</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot purple"></div>
+              <div class="feed-text">AI δημιούργησε νέο πλάνο 7 ημερών για <strong>Σοφία Αντωνίου</strong></div>
+              <div class="feed-time">1ω πριν</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot orange"></div>
+              <div class="feed-text"><strong>Νίκος Δημητρίου</strong> μέτρησε βάρος — 84.2kg (-0.4kg)</div>
+              <div class="feed-time">2ω πριν</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-dot blue"></div>
+              <div class="feed-text">Νέο μήνυμα από <strong>Ελένη Τσιώτου</strong> στο inbox</div>
+              <div class="feed-time">3ω πριν</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Απόδοση Πλάνων</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                <span style="color:var(--text2)">Μεσογειακή Δίαιτα</span>
+                <span style="color:var(--green);font-weight:600">94%</span>
+              </div>
+              <div class="cal-bar-track"><div class="cal-bar-fill" style="width:94%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                <span style="color:var(--text2)">Keto</span>
+                <span style="color:var(--accent);font-weight:600">88%</span>
+              </div>
+              <div class="cal-bar-track"><div class="cal-bar-fill" style="width:88%"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                <span style="color:var(--text2)">Intermittent Fasting</span>
+                <span style="color:var(--accent3);font-weight:600">82%</span>
+              </div>
+              <div class="cal-bar-track"><div class="cal-bar-fill" style="width:82%;background:linear-gradient(90deg,var(--accent3),#06b6d4)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                <span style="color:var(--text2)">Vegan Αθλητικό</span>
+                <span style="color:var(--orange);font-weight:600">76%</span>
+              </div>
+              <div class="cal-bar-track"><div class="cal-bar-fill" style="width:76%;background:linear-gradient(90deg,var(--orange),#fbbf24)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                <span style="color:var(--text2)">Διαβήτης Τ2</span>
+                <span style="color:var(--purple);font-weight:600">91%</span>
+              </div>
+              <div class="cal-bar-track"><div class="cal-bar-fill" style="width:91%;background:linear-gradient(90deg,var(--purple),#a78bfa)"></div></div>
+            </div>
+          </div>
+          <div class="divider" style="margin:14px 0 10px"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-primary" style="flex:1;justify-content:center;font-size:12px;padding:7px 12px">
+              <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V9"/><path d="M15 3l2 2-7 7-3 1 1-3 7-7z"/></svg>
+              Νέο Πλάνο με AI
+            </button>
+            <div class="icon-btn" style="width:34px;height:34px">
+              <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 16.5L10 3l7 13.5H3z"/><path d="M10 10v3"/><circle cx="10" cy="14.5" r="0.5" fill="currentColor"/></svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="powered">athlisis.com</div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    this.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Nav item switching
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Animate bars on load
+window.addEventListener('load', () => {
+  document.querySelectorAll('.cal-bar-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(() => { bar.style.width = w; }, 200);
+  });
+  document.querySelectorAll('.rev-bar').forEach((bar, i) => {
+    const h = bar.style.height;
+    bar.style.height = '0';
+    setTimeout(() => { bar.style.height = h; }, 150 + i * 80);
+  });
+});
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

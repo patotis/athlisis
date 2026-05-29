@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Εγγραφή & Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#080c14;--bg2:#0d1220;--bg3:#111827;
+    --surface:rgba(255,255,255,.03);--surface2:rgba(255,255,255,.06);
+    --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+    --text:#f0f4ff;--text2:#8892a4;--text3:#4a5568;
+    --accent:#3b82f6;--accent2:#6366f1;--accent3:#06b6d4;
+    --green:#10b981;--orange:#f59e0b;--font-d:'Syne',sans-serif;--font-s:'Instrument Serif',serif;--font-b:'DM Sans',sans-serif;
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh;overflow-x:hidden}
+
+  /* BACKGROUND */
+  .bg-glow{position:fixed;pointer-events:none;z-index:0}
+  .bg-glow-1{top:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,.12) 0%,transparent 70%)}
+  .bg-glow-2{bottom:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(6,182,212,.08) 0%,transparent 70%)}
+
+  /* SCREENS */
+  .screen{display:none;min-height:100vh;position:relative;z-index:1}
+  .screen.active{display:flex}
+
+  /* AUTH SCREENS */
+  .auth-layout{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+  .auth-hero{background:linear-gradient(135deg,rgba(59,130,246,.08) 0%,rgba(99,102,241,.06) 50%,rgba(6,182,212,.04) 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:60px;position:relative;overflow:hidden}
+  .auth-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,.15) 0%,transparent 70%);pointer-events:none}
+  .auth-hero::after{content:'';position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(6,182,212,.1) 0%,transparent 70%);pointer-events:none}
+  .hero-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
+  .hero-logo-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;font-size:18px;color:white;box-shadow:0 0 28px rgba(99,102,241,.4)}
+  .hero-logo-text{font-family:var(--font-d);font-size:22px;font-weight:800;background:linear-gradient(90deg,var(--text),var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-eyebrow{font-size:11px;font-family:var(--font-d);font-weight:600;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+  .hero-title{font-family:var(--font-d);font-size:38px;font-weight:800;line-height:1.15;margin-bottom:16px}
+  .hero-title em{font-family:var(--font-s);font-style:italic;color:var(--accent3);font-weight:400}
+  .hero-sub{font-size:14px;color:var(--text2);line-height:1.75;max-width:360px;margin-bottom:36px}
+  .hero-features{display:flex;flex-direction:column;gap:12px}
+  .hf-item{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--text2)}
+  .hf-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .hero-stats{display:flex;gap:24px;margin-top:40px}
+  .hs-item{text-align:center}
+  .hs-val{font-family:var(--font-d);font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hs-label{font-size:11px;color:var(--text3);font-family:var(--font-d);font-weight:600}
+
+  /* AUTH FORM */
+  .auth-form-wrap{display:flex;flex-direction:column;justify-content:center;padding:60px 60px;background:var(--bg)}
+  .form-logo{display:none}
+  .form-title{font-family:var(--font-d);font-size:26px;font-weight:800;margin-bottom:6px}
+  .form-sub{font-size:13.5px;color:var(--text2);margin-bottom:32px}
+  .form-sub a{color:var(--accent);cursor:pointer}
+  .social-btns{display:flex;gap:10px;margin-bottom:24px}
+  .social-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:13px;font-family:var(--font-d);font-weight:600;cursor:pointer;transition:all .15s}
+  .social-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+  .divider-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .div-line{flex:1;height:1px;background:var(--border)}
+  .div-text{font-size:12px;color:var(--text3);font-family:var(--font-d);font-weight:600;white-space:nowrap}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .field-label{font-size:12px;font-family:var(--font-d);font-weight:600;color:var(--text2)}
+  .field-input{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--font-b);font-size:13.5px;outline:none;transition:all .2s;width:100%}
+  .field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+  .field-input.error{border-color:var(--red)}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .forgot{font-size:12px;color:var(--accent);cursor:pointer;text-align:right;margin-top:-8px;margin-bottom:14px}
+  .submit-btn{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;box-shadow:0 6px 24px rgba(59,130,246,.35);margin-bottom:16px}
+  .submit-btn:hover{transform:translateY(-1px);box-shadow:0 8px 32px rgba(59,130,246,.45)}
+  .terms{font-size:11.5px;color:var(--text3);text-align:center;line-height:1.6}
+  .terms a{color:var(--text2);cursor:pointer}
+
+  /* ONBOARDING */
+  .onboard-layout{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--bg)}
+  .ob-progress{display:flex;gap:6px;margin-bottom:40px}
+  .ob-step{width:32px;height:4px;border-radius:2px;background:var(--border2);transition:all .3s}
+  .ob-step.done{background:var(--green)}
+  .ob-step.current{background:var(--accent);width:48px}
+  .ob-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px 40px;width:100%;max-width:540px;position:relative;overflow:hidden}
+  .ob-card::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 70%);pointer-events:none}
+  .ob-step-num{font-size:11px;font-family:var(--font-d);font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+  .ob-title{font-family:var(--font-d);font-size:22px;font-weight:800;margin-bottom:6px}
+  .ob-sub{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+  .profession-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+  .prof-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .2s}
+  .prof-card:hover{background:var(--surface2);border-color:var(--border2);transform:translateY(-1px)}
+  .prof-card.selected{background:rgba(59,130,246,.1);border-color:var(--accent)}
+  .prof-icon{font-size:26px;margin-bottom:8px}
+  .prof-name{font-size:12px;font-family:var(--font-d);font-weight:600;color:var(--text2)}
+  .prof-card.selected .prof-name{color:var(--accent)}
+  .ob-nav{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+  .ob-back{padding:10px 20px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:var(--font-d);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+  .ob-back:hover{background:var(--surface2);color:var(--text)}
+  .ob-next{padding:10px 24px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(59,130,246,.3)}
+  .ob-next:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,130,246,.4)}
+  .checkmark{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .checkmark.checked{background:var(--accent);border-color:var(--accent);color:white}
+  .check-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+  .check-row:last-child{border-bottom:none}
+  .check-label{font-size:13px;flex:1}
+  .check-sub{font-size:11.5px;color:var(--text2)}
+
+  /* SUCCESS */
+  .success-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;background:var(--bg)}
+  .success-icon{width:80px;height:80px;background:linear-gradient(135deg,var(--green),var(--accent3));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 24px;box-shadow:0 0 40px rgba(16,185,129,.3);animation:popIn .5s ease both}
+  @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .success-title{font-family:var(--font-d);font-size:28px;font-weight:800;margin-bottom:8px}
+  .success-sub{font-size:14px;color:var(--text2);max-width:360px;margin:0 auto 32px;line-height:1.7}
+  .success-cards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+  .sc-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;text-align:center;min-width:120px}
+  .sc-val{font-family:var(--font-d);font-size:20px;font-weight:800;margin-bottom:4px}
+  .sc-label{font-size:11px;color:var(--text3);font-family:var(--font-d);font-weight:600}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .ob-card{animation:fadeUp .4s ease both}
+
+  @media(max-width:800px){
+    .auth-hero{display:none}
+    .auth-form-wrap{padding:40px 28px}
+    .profession-grid{grid-template-columns:repeat(2,1fr)}
+    .field-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<!-- ===== SIGN IN ===== -->
+<div class="screen active" id="screen-signin">
+  <div class="auth-layout">
+    <div class="auth-hero">
+      <div class="hero-logo">
+        <div class="hero-logo-mark">A</div>
+        <div class="hero-logo-text">Athlisis</div>
+      </div>
+      <div class="hero-eyebrow">✦ Next-gen wellness platform</div>
+      <div class="hero-title">Το <em>future</em> της<br>διατροφολογίας είναι εδώ</div>
+      <div class="hero-sub">AI-powered πλατφόρμα για διαιτολόγους, personal trainers και κλινικές υγείας. Διαχείρισε πελάτες, δημιούργησε πλάνα με AI, ανάλυσε πρόοδο — όλα σε ένα μέρος.</div>
+      <div class="hero-features">
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(59,130,246,.1)">🤖</div>AI meal plans σε δευτερόλεπτα</div>
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(16,185,129,.1)">📊</div>Real-time adherence tracking</div>
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(245,158,11,.1)">💬</div>In-app messaging & voice notes</div>
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(139,92,246,.1)">📱</div>Client mobile app included</div>
+      </div>
+      <div class="hero-stats">
+        <div class="hs-item"><div class="hs-val">1,200+</div><div class="hs-label">Επαγγελματίες</div></div>
+        <div class="hs-item"><div class="hs-val">38K+</div><div class="hs-label">Πελάτες</div></div>
+        <div class="hs-item"><div class="hs-val">95K+</div><div class="hs-label">AI Πλάνα</div></div>
+      </div>
+    </div>
+    <div class="auth-form-wrap">
+      <div class="form-title">Καλωσόρισες πίσω</div>
+      <div class="form-sub">Δεν έχεις λογαριασμό; <a onclick="showScreen('screen-signup')">Εγγραφή δωρεάν →</a></div>
+      <div class="social-btns">
+        <div class="social-btn" onclick="socialLogin('google')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </div>
+        <div class="social-btn" onclick="socialLogin('apple')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple
+        </div>
+      </div>
+      <div class="divider-row"><div class="div-line"></div><div class="div-text">ή με email</div><div class="div-line"></div></div>
+      <div class="field">
+        <div class="field-label">Email</div>
+        <input class="field-input" type="email" placeholder="doctor@clinic.com" id="signin-email">
+      </div>
+      <div class="field">
+        <div class="field-label">Κωδικός</div>
+        <input class="field-input" type="password" placeholder="••••••••" id="signin-pass">
+      </div>
+      <div class="forgot">Ξέχασες τον κωδικό;</div>
+      <button class="submit-btn" onclick="handleSignin()">Σύνδεση →</button>
+      <div class="terms">14 ημέρες δωρεάν trial · Χωρίς πιστωτική κάρτα</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SIGN UP ===== -->
+<div class="screen" id="screen-signup">
+  <div class="auth-layout">
+    <div class="auth-hero">
+      <div class="hero-logo">
+        <div class="hero-logo-mark">A</div>
+        <div class="hero-logo-text">Athlisis</div>
+      </div>
+      <div class="hero-eyebrow">✦ 14 ημέρες δωρεάν</div>
+      <div class="hero-title">Ξεκίνα <em>δωρεάν</em><br>σήμερα</div>
+      <div class="hero-sub">Δημιούργησε λογαριασμό σε 2 λεπτά. Δεν χρειάζεται πιστωτική κάρτα. Πλήρης πρόσβαση για 14 ημέρες.</div>
+      <div class="hero-features">
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(16,185,129,.1)">✓</div>Έως 10 πελάτες δωρεάν</div>
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(16,185,129,.1)">✓</div>5 AI πλάνα για να δοκιμάσεις</div>
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(16,185,129,.1)">✓</div>Πλήρες ημερολόγιο & CRM</div>
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(16,185,129,.1)">✓</div>Mobile app για πελάτες</div>
+        <div class="hf-item"><div class="hf-icon" style="background:rgba(16,185,129,.1)">✓</div>Ακύρωση ανά πάσα στιγμή</div>
+      </div>
+    </div>
+    <div class="auth-form-wrap">
+      <div class="form-title">Δημιούργησε λογαριασμό</div>
+      <div class="form-sub">Έχεις ήδη λογαριασμό; <a onclick="showScreen('screen-signin')">Σύνδεση →</a></div>
+      <div class="social-btns">
+        <div class="social-btn" onclick="socialLogin('google')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </div>
+        <div class="social-btn" onclick="socialLogin('apple')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple
+        </div>
+      </div>
+      <div class="divider-row"><div class="div-line"></div><div class="div-text">ή με email</div><div class="div-line"></div></div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Όνομα</div>
+          <input class="field-input" type="text" placeholder="Γιώργος" id="signup-fname">
+        </div>
+        <div class="field">
+          <div class="field-label">Επώνυμο</div>
+          <input class="field-input" type="text" placeholder="Παπαδόπουλος" id="signup-lname">
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Email</div>
+        <input class="field-input" type="email" placeholder="doctor@clinic.com" id="signup-email">
+      </div>
+      <div class="field">
+        <div class="field-label">Κωδικός (τουλάχιστον 8 χαρακτήρες)</div>
+        <input class="field-input" type="password" placeholder="••••••••" id="signup-pass">
+      </div>
+      <button class="submit-btn" onclick="handleSignup()">Δημιουργία Λογαριασμού →</button>
+      <div class="terms">Με την εγγραφή αποδέχεσαι τους <a>Όρους Χρήσης</a> και την <a>Πολιτική Απορρήτου</a> μας. GDPR compliant.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING STEP 1: PROFESSION ===== -->
+<div class="screen" id="screen-ob1">
+  <div class="onboard-layout">
+    <div class="ob-progress">
+      <div class="ob-step current"></div>
+      <div class="ob-step"></div>
+      <div class="ob-step"></div>
+      <div class="ob-step"></div>
+    </div>
+    <div class="ob-card">
+      <div class="ob-step-num">Βήμα 1 από 4</div>
+      <div class="ob-title">Ποια είναι η ειδικότητά σου;</div>
+      <div class="ob-sub">Θα προσαρμόσουμε την πλατφόρμα στις ανάγκες σου.</div>
+      <div class="profession-grid" id="profGrid">
+        <div class="prof-card selected" onclick="selectProf(this)">
+          <div class="prof-icon">🥗</div>
+          <div class="prof-name">Διαιτολόγος</div>
+        </div>
+        <div class="prof-card" onclick="selectProf(this)">
+          <div class="prof-icon">🍎</div>
+          <div class="prof-name">Διατροφολόγος</div>
+        </div>
+        <div class="prof-card" onclick="selectProf(this)">
+          <div class="prof-icon">🏋️</div>
+          <div class="prof-name">Personal Trainer</div>
+        </div>
+        <div class="prof-card" onclick="selectProf(this)">
+          <div class="prof-icon">🧘</div>
+          <div class="prof-name">Pilates / Yoga</div>
+        </div>
+        <div class="prof-card" onclick="selectProf(this)">
+          <div class="prof-icon">🩺</div>
+          <div class="prof-name">Φυσιοθεραπευτής</div>
+        </div>
+        <div class="prof-card" onclick="selectProf(this)">
+          <div class="prof-icon">🏥</div>
+          <div class="prof-name">Κλινική / Studio</div>
+        </div>
+      </div>
+      <div class="ob-nav">
+        <button class="ob-next" onclick="showScreen('screen-ob2')">Συνέχεια →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING STEP 2: PRACTICE SIZE ===== -->
+<div class="screen" id="screen-ob2">
+  <div class="onboard-layout">
+    <div class="ob-progress">
+      <div class="ob-step done"></div>
+      <div class="ob-step current"></div>
+      <div class="ob-step"></div>
+      <div class="ob-step"></div>
+    </div>
+    <div class="ob-card">
+      <div class="ob-step-num">Βήμα 2 από 4</div>
+      <div class="ob-title">Πόσους πελάτες έχεις;</div>
+      <div class="ob-sub">Θα επιλέξουμε το κατάλληλο πλάνο για εσένα.</div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div class="check-row" onclick="selectSize(this,'1-10')">
+          <div class="checkmark checked" id="size-1-10">✓</div>
+          <div><div class="check-label">1–10 πελάτες</div><div class="check-sub">Ξεκινάω ή δουλεύω part-time</div></div>
+        </div>
+        <div class="check-row" onclick="selectSize(this,'11-30')">
+          <div class="checkmark" id="size-11-30"></div>
+          <div><div class="check-label">11–30 πελάτες</div><div class="check-sub">Established πράκτορας, full-time</div></div>
+        </div>
+        <div class="check-row" onclick="selectSize(this,'31-100')">
+          <div class="checkmark" id="size-31-100"></div>
+          <div><div class="check-label">31–100 πελάτες</div><div class="check-sub">Μεγάλη πρακτική ή μικρή κλινική</div></div>
+        </div>
+        <div class="check-row" onclick="selectSize(this,'100+')">
+          <div class="checkmark" id="size-100+"></div>
+          <div><div class="check-label">100+ πελάτες</div><div class="check-sub">Κλινική / Studio / Ομάδα επαγγελματιών</div></div>
+        </div>
+      </div>
+      <div class="ob-nav">
+        <button class="ob-back" onclick="showScreen('screen-ob1')">← Πίσω</button>
+        <button class="ob-next" onclick="showScreen('screen-ob3')">Συνέχεια →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING STEP 3: FEATURES ===== -->
+<div class="screen" id="screen-ob3">
+  <div class="onboard-layout">
+    <div class="ob-progress">
+      <div class="ob-step done"></div>
+      <div class="ob-step done"></div>
+      <div class="ob-step current"></div>
+      <div class="ob-step"></div>
+    </div>
+    <div class="ob-card">
+      <div class="ob-step-num">Βήμα 3 από 4</div>
+      <div class="ob-title">Τι σε ενδιαφέρει περισσότερο;</div>
+      <div class="ob-sub">Επίλεξε τα χαρακτηριστικά που θέλεις να εξερευνήσεις πρώτα.</div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div class="check-row" onclick="toggleFeature(this)">
+          <div class="checkmark checked">✓</div>
+          <div><div class="check-label">🤖 AI Δημιουργία Πλάνων</div><div class="check-sub">Εξατομικευμένα διατροφικά πλάνα σε δευτερόλεπτα</div></div>
+        </div>
+        <div class="check-row" onclick="toggleFeature(this)">
+          <div class="checkmark checked">✓</div>
+          <div><div class="check-label">📊 Παρακολούθηση Προόδου</div><div class="check-sub">Μετρήσεις, εξετάσεις, βάρος, adherence</div></div>
+        </div>
+        <div class="check-row" onclick="toggleFeature(this)">
+          <div class="checkmark">  </div>
+          <div><div class="check-label">📅 Ημερολόγιο Ραντεβού</div><div class="check-sub">Zoom/Meet integration, αυτόματες υπενθυμίσεις</div></div>
+        </div>
+        <div class="check-row" onclick="toggleFeature(this)">
+          <div class="checkmark">  </div>
+          <div><div class="check-label">💬 Messaging & Επικοινωνία</div><div class="check-sub">Chat, φωνητικά, AI draft απαντήσεις</div></div>
+        </div>
+        <div class="check-row" onclick="toggleFeature(this)">
+          <div class="checkmark">  </div>
+          <div><div class="check-label">💳 Χρεώσεις & Πληρωμές</div><div class="check-sub">Stripe, τιμολόγια, συνδρομές πελατών</div></div>
+        </div>
+      </div>
+      <div class="ob-nav">
+        <button class="ob-back" onclick="showScreen('screen-ob2')">← Πίσω</button>
+        <button class="ob-next" onclick="showScreen('screen-ob4')">Συνέχεια →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING STEP 4: SETUP ===== -->
+<div class="screen" id="screen-ob4">
+  <div class="onboard-layout">
+    <div class="ob-progress">
+      <div class="ob-step done"></div>
+      <div class="ob-step done"></div>
+      <div class="ob-step done"></div>
+      <div class="ob-step current"></div>
+    </div>
+    <div class="ob-card">
+      <div class="ob-step-num">Βήμα 4 από 4</div>
+      <div class="ob-title">Στήσε το προφίλ σου</div>
+      <div class="ob-sub">Τελευταίο βήμα — προσθήκη βασικών πληροφοριών.</div>
+      <div class="field">
+        <div class="field-label">Επωνυμία / Κλινική</div>
+        <input class="field-input" type="text" placeholder="π.χ. Κωνσταντίνου Nutrition Clinic">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Αριθμός Μητρώου</div>
+          <input class="field-input" type="text" placeholder="Προαιρετικό">
+        </div>
+        <div class="field">
+          <div class="field-label">Τηλέφωνο</div>
+          <input class="field-input" type="tel" placeholder="+30 69...">
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Πόλη</div>
+        <input class="field-input" type="text" placeholder="Αθήνα">
+      </div>
+      <div class="ob-nav">
+        <button class="ob-back" onclick="showScreen('screen-ob3')">← Πίσω</button>
+        <button class="ob-next" style="background:linear-gradient(135deg,var(--green),var(--accent3))" onclick="showScreen('screen-success')">🚀 Ξεκίνα!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUCCESS ===== -->
+<div class="screen" id="screen-success">
+  <div class="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Είσαι έτοιμος!</div>
+    <div class="success-sub">Ο λογαριασμός σου δημιουργήθηκε επιτυχώς. Έχεις 14 ημέρες δωρεάν πρόσβαση σε όλες τις δυνατότητες του Athlisis Professional.</div>
+    <div class="success-cards">
+      <div class="sc-card"><div class="sc-val" style="color:var(--accent)">14</div><div class="sc-label">Ημέρες Trial</div></div>
+      <div class="sc-card"><div class="sc-val" style="color:var(--green)">10</div><div class="sc-label">Δωρεάν Πελάτες</div></div>
+      <div class="sc-card"><div class="sc-val" style="color:var(--accent2)">5</div><div class="sc-label">AI Πλάνα</div></div>
+    </div>
+    <button style="padding:14px 32px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:15px;font-weight:700;border:none;cursor:pointer;box-shadow:0 8px 32px rgba(59,130,246,.4);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" onclick="goDashboard()">
+      Πήγαινε στο Dashboard →
+    </button>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function handleSignin() {
+  const email = document.getElementById('signin-email').value;
+  const pass = document.getElementById('signin-pass').value;
+  if (!email || !pass) { alert('Συμπλήρωσε email και κωδικό'); return; }
+  showScreen('screen-ob1');
+}
+
+function handleSignup() {
+  const email = document.getElementById('signup-email').value;
+  if (!email) { alert('Συμπλήρωσε το email σου'); return; }
+  showScreen('screen-ob1');
+}
+
+function socialLogin(provider) {
+  showScreen('screen-ob1');
+}
+
+function selectProf(el) {
+  document.querySelectorAll('.prof-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectSize(row, id) {
+  document.querySelectorAll('.checkmark[id^="size"]').forEach(c => { c.classList.remove('checked'); c.textContent = ''; });
+  const chk = document.getElementById('size-'+id);
+  chk.classList.add('checked'); chk.textContent = '✓';
+}
+
+function toggleFeature(row) {
+  const chk = row.querySelector('.checkmark');
+  chk.classList.toggle('checked');
+  chk.textContent = chk.classList.contains('checked') ? '✓' : '  ';
+}
+
+function goDashboard() {
+  window.location.href = 'dashboard.html';
+}
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>

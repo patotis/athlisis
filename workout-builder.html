@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlisis — Workout Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#080c14;--bg2:#0d1220;--bg3:#111827;
+    --surface:rgba(255,255,255,.03);--surface2:rgba(255,255,255,.06);
+    --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+    --text:#f0f4ff;--text2:#8892a4;--text3:#4a5568;
+    --accent:#3b82f6;--accent2:#6366f1;--accent3:#06b6d4;
+    --green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+    --font-d:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+  .topbar{display:flex;align-items:center;gap:14px;padding:13px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
+  .btn-primary{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-family:var(--font-d);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.3)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-sec{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12.5px;font-family:var(--font-d);font-weight:500;cursor:pointer;transition:all .15s}
+  .btn-sec:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+
+  /* SPLIT LAYOUT */
+  .split{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 57px)}
+
+  /* EXERCISE LIBRARY */
+  .library{border-right:1px solid var(--border);background:var(--bg2);display:flex;flex-direction:column}
+  .lib-header{padding:16px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .lib-title{font-family:var(--font-d);font-size:13px;font-weight:700;margin-bottom:10px}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:8px}
+  .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:12.5px;font-family:var(--font-b);flex:1}
+  .search-box input::placeholder{color:var(--text3)}
+  .filter-chips{display:flex;gap:5px;flex-wrap:wrap}
+  .fchip{padding:4px 10px;border-radius:20px;font-size:11px;font-family:var(--font-d);font-weight:600;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s}
+  .fchip:hover{border-color:var(--accent);color:var(--text)}
+  .fchip.active{background:rgba(59,130,246,.12);border-color:var(--accent);color:var(--accent)}
+  .ex-list{flex:1;overflow-y:auto;padding:10px}
+
+  /* EXERCISE CARD */
+  .ex-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:7px;cursor:grab;transition:all .15s;user-select:none}
+  .ex-card:hover{background:var(--surface2);border-color:var(--border2);transform:translateX(2px)}
+  .ex-card:active{cursor:grabbing;opacity:.7}
+  .ex-thumb{width:42px;height:42px;border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .ex-thumb.strength{background:rgba(239,68,68,.1)}
+  .ex-thumb.cardio{background:rgba(245,158,11,.1)}
+  .ex-thumb.mobility{background:rgba(16,185,129,.1)}
+  .ex-info{flex:1;min-width:0}
+  .ex-name{font-size:12.5px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ex-tags{display:flex;gap:4px;flex-wrap:wrap}
+  .ex-tag{font-size:9.5px;font-family:var(--font-d);font-weight:600;padding:1px 6px;border-radius:10px}
+  .ex-tag.s{background:rgba(239,68,68,.1);color:var(--red)}
+  .ex-tag.c{background:rgba(245,158,11,.1);color:var(--orange)}
+  .ex-tag.m{background:rgba(16,185,129,.1);color:var(--green)}
+  .ex-tag.mus{background:rgba(59,130,246,.08);color:var(--text2)}
+  .add-ex-btn{width:26px;height:26px;border-radius:6px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);font-size:16px;font-weight:700;transition:all .15s;flex-shrink:0}
+  .add-ex-btn:hover{background:rgba(59,130,246,.2)}
+
+  /* BUILDER */
+  .builder{padding:24px;overflow-y:auto}
+  .builder-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+  .plan-title-input{font-family:var(--font-d);font-size:22px;font-weight:800;background:none;border:none;outline:none;color:var(--text);width:100%;border-bottom:1px solid var(--border);padding-bottom:6px;transition:border-color .2s}
+  .plan-title-input:focus{border-bottom-color:var(--accent)}
+  .builder-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  .meta-select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:var(--font-b);font-size:12.5px;outline:none;cursor:pointer}
+  .meta-select:focus{border-color:var(--accent)}
+  select option{background:#1a2035}
+
+  /* DAY COLUMNS */
+  .days-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+
+  /* DAY CARD */
+  .day-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+  .day-card:hover{border-color:var(--border2)}
+  .day-card-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+  .day-num{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;font-family:var(--font-d);flex-shrink:0}
+  .day-name-input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font-d);font-size:13px;font-weight:600;flex:1}
+  .day-more{color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px}
+  .day-body{padding:10px;min-height:80px}
+  .drop-zone{border:2px dashed var(--border2);border-radius:8px;padding:16px;text-align:center;font-size:12px;color:var(--text3);margin-bottom:8px;transition:all .2s;cursor:pointer}
+  .drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(59,130,246,.04);color:var(--accent)}
+  .add-day-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border:2px dashed var(--border2);border-radius:12px;font-size:12.5px;font-family:var(--font-d);font-weight:600;color:var(--text3);cursor:pointer;transition:all .2s;background:none;width:100%}
+  .add-day-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* EXERCISE IN PLAN */
+  .plan-ex{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:grab;transition:all .15s;position:relative}
+  .plan-ex:hover{border-color:var(--border2)}
+  .plan-ex:active{cursor:grabbing;opacity:.7}
+  .pe-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .pe-icon{font-size:16px;width:28px;height:28px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .pe-name{font-size:12.5px;font-weight:500;flex:1}
+  .pe-remove{color:var(--text3);cursor:pointer;font-size:13px;transition:color .15s;padding:2px 4px}
+  .pe-remove:hover{color:var(--red)}
+  .pe-sets{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .pe-input-wrap{display:flex;flex-direction:column;gap:3px}
+  .pe-input-label{font-size:9.5px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .pe-input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-family:var(--font-b);font-size:12px;outline:none;width:100%;transition:border-color .15s}
+  .pe-input:focus{border-color:var(--accent)}
+  .drag-handle{position:absolute;left:4px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;cursor:grab;opacity:.4}
+  .drag-handle:hover{opacity:.8}
+
+  /* SUMMARY BAR */
+  .summary-bar{display:flex;gap:14px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;flex-wrap:wrap}
+  .sb-item{display:flex;flex-direction:column;gap:2px}
+  .sb-val{font-family:var(--font-d);font-size:16px;font-weight:800}
+  .sb-label{font-size:10px;color:var(--text3);font-family:var(--font-d);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .sb-divider{width:1px;background:var(--border);align-self:stretch}
+
+  @media(max-width:800px){.split{grid-template-columns:1fr}.library{display:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="font-family:var(--font-d);font-size:15px;font-weight:600;flex:1">Workout Builder</div>
+  <button class="btn-sec">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l4 12 3-6 6-3L4 4z"/></svg>
+    AI Δημιουργία
+  </button>
+  <button class="btn-sec">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l3-3m0 0l3 3m-3-3v8"/></svg>
+    Αποθήκευση Template
+  </button>
+  <button class="btn-primary" onclick="savePlan()">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l5 5 9-9"/></svg>
+    Αποθήκευση & Αποστολή
+  </button>
+</div>
+
+<div class="split">
+
+  <!-- EXERCISE LIBRARY -->
+  <div class="library">
+    <div class="lib-header">
+      <div class="lib-title">Βιβλιοθήκη Ασκήσεων</div>
+      <div class="search-box">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="var(--text3)" stroke-width="1.5"><circle cx="9" cy="9" r="5.5"/><path d="M15 15l3 3"/></svg>
+        <input type="text" placeholder="Αναζήτηση άσκησης..." oninput="filterExercises(this.value)">
+      </div>
+      <div class="filter-chips">
+        <div class="fchip active" onclick="filterCat(this,'all')">Όλες</div>
+        <div class="fchip" onclick="filterCat(this,'strength')">💪 Δύναμη</div>
+        <div class="fchip" onclick="filterCat(this,'cardio')">🏃 Cardio</div>
+        <div class="fchip" onclick="filterCat(this,'mobility')">🧘 Mobility</div>
+      </div>
+    </div>
+    <div class="ex-list" id="exList">
+      <!-- Generated by JS -->
+    </div>
+  </div>
+
+  <!-- BUILDER -->
+  <div class="builder">
+
+    <!-- PLAN META -->
+    <div class="builder-header">
+      <div style="flex:1;min-width:200px">
+        <input class="plan-title-input" id="planTitle" type="text" value="Πρόγραμμα Δύναμης — Αλέξανδρος Κ." placeholder="Τίτλος προγράμματος...">
+      </div>
+    </div>
+    <div class="builder-meta">
+      <select class="meta-select" id="clientSel">
+        <option>Αλέξανδρος Κωστόπουλος</option>
+        <option>Μαρία Παπαδοπούλου</option>
+        <option>Νίκος Δημητρίου</option>
+      </select>
+      <select class="meta-select">
+        <option>4 εβδομάδες</option>
+        <option>8 εβδομάδες</option>
+        <option>12 εβδομάδες</option>
+      </select>
+      <select class="meta-select">
+        <option>Μυϊκή ανάπτυξη</option>
+        <option>Δύναμη</option>
+        <option>Αδυνάτισμα</option>
+        <option>Αντοχή</option>
+      </select>
+      <select class="meta-select">
+        <option>Intermediate</option>
+        <option>Beginner</option>
+        <option>Advanced</option>
+      </select>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-bar">
+      <div class="sb-item"><div class="sb-val" style="color:var(--accent)" id="totalDays">3</div><div class="sb-label">Ημέρες / εβδ.</div></div>
+      <div class="sb-divider"></div>
+      <div class="sb-item"><div class="sb-val" style="color:var(--green)" id="totalEx">12</div><div class="sb-label">Ασκήσεις</div></div>
+      <div class="sb-divider"></div>
+      <div class="sb-item"><div class="sb-val" style="color:var(--orange)">~55'</div><div class="sb-label">Διάρκεια / ημέρα</div></div>
+      <div class="sb-divider"></div>
+      <div class="sb-item"><div class="sb-val" style="color:var(--purple)">4 εβδ.</div><div class="sb-label">Συνολική διάρκεια</div></div>
+      <div class="sb-divider"></div>
+      <div class="sb-item"><div class="sb-val" style="color:var(--accent2)">Push/Pull/Legs</div><div class="sb-label">Διαχωρισμός</div></div>
+    </div>
+
+    <!-- DAYS GRID -->
+    <div class="days-grid" id="daysGrid">
+
+      <!-- DAY 1: PUSH -->
+      <div class="day-card" id="day1">
+        <div class="day-card-header">
+          <div class="day-num">1</div>
+          <input class="day-name-input" value="Push — Στήθος / Ώμοι / Τρίκεφαλα" placeholder="Όνομα ημέρας...">
+          <div class="day-more">⋮</div>
+        </div>
+        <div class="day-body">
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🏋️</div>
+              <div class="pe-name">Barbell Bench Press</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="4"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="8-10"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="90''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">💪</div>
+              <div class="pe-name">Incline DB Press</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="3"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="10-12"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="75''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🎯</div>
+              <div class="pe-name">Overhead Press</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="4"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="8-10"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="90''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🔱</div>
+              <div class="pe-name">Tricep Pushdown</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="3"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="12-15"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="60''"></div>
+            </div>
+          </div>
+          <div class="drop-zone" onclick="addExToDay('day1')" ondragover="dragOver(event)" ondrop="dropEx(event,'day1')">
+            + Σύρε άσκηση εδώ ή πάτα για προσθήκη
+          </div>
+        </div>
+      </div>
+
+      <!-- DAY 2: PULL -->
+      <div class="day-card" id="day2">
+        <div class="day-card-header">
+          <div class="day-num" style="background:linear-gradient(135deg,var(--green),var(--accent3))">2</div>
+          <input class="day-name-input" value="Pull — Πλάτη / Δικέφαλα" placeholder="Όνομα ημέρας...">
+          <div class="day-more">⋮</div>
+        </div>
+        <div class="day-body">
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🏋️</div>
+              <div class="pe-name">Barbell Row</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="4"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="8-10"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="90''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🔝</div>
+              <div class="pe-name">Lat Pulldown</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="3"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="10-12"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="75''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">💪</div>
+              <div class="pe-name">Barbell Curl</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="3"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="10-12"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="60''"></div>
+            </div>
+          </div>
+          <div class="drop-zone" onclick="addExToDay('day2')" ondragover="dragOver(event)" ondrop="dropEx(event,'day2')">
+            + Σύρε άσκηση εδώ ή πάτα για προσθήκη
+          </div>
+        </div>
+      </div>
+
+      <!-- DAY 3: LEGS -->
+      <div class="day-card" id="day3">
+        <div class="day-card-header">
+          <div class="day-num" style="background:linear-gradient(135deg,var(--purple),var(--accent2))">3</div>
+          <input class="day-name-input" value="Legs — Τετρακέφαλα / Οπίσθια / Γλουτοί" placeholder="Όνομα ημέρας...">
+          <div class="day-more">⋮</div>
+        </div>
+        <div class="day-body">
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🦵</div>
+              <div class="pe-name">Back Squat</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="4"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="6-8"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="120''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🏋️</div>
+              <div class="pe-name">Romanian Deadlift</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="3"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="8-10"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="90''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">🔄</div>
+              <div class="pe-name">Leg Press</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="3"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="12-15"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="75''"></div>
+            </div>
+          </div>
+          <div class="plan-ex" draggable="true">
+            <div class="drag-handle">⠿</div>
+            <div class="pe-header" style="padding-left:16px">
+              <div class="pe-icon">⬆️</div>
+              <div class="pe-name">Calf Raise</div>
+              <div class="pe-remove" onclick="removeEx(this)">✕</div>
+            </div>
+            <div class="pe-sets" style="padding-left:16px">
+              <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="4"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="15-20"></div>
+              <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="45''"></div>
+            </div>
+          </div>
+          <div class="drop-zone" onclick="addExToDay('day3')" ondragover="dragOver(event)" ondrop="dropEx(event,'day3')">
+            + Σύρε άσκηση εδώ ή πάτα για προσθήκη
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="add-day-btn" onclick="addDay()">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 5v10M5 10h10"/></svg>
+      Προσθήκη Ημέρας
+    </button>
+
+  </div>
+</div>
+
+<script>
+const exercises = [
+  { name:'Barbell Bench Press', cat:'strength', muscles:['Στήθος','Τρίκεφαλα'], icon:'🏋️' },
+  { name:'Overhead Press', cat:'strength', muscles:['Ώμοι','Τρίκεφαλα'], icon:'🎯' },
+  { name:'Back Squat', cat:'strength', muscles:['Τετρακέφαλα','Γλουτοί'], icon:'🦵' },
+  { name:'Deadlift', cat:'strength', muscles:['Πλάτη','Οπίσθια'], icon:'🏋️' },
+  { name:'Pull-ups', cat:'strength', muscles:['Πλάτη','Δικέφαλα'], icon:'🔝' },
+  { name:'Barbell Row', cat:'strength', muscles:['Πλάτη','Δικέφαλα'], icon:'↔️' },
+  { name:'Dumbbell Curl', cat:'strength', muscles:['Δικέφαλα'], icon:'💪' },
+  { name:'Tricep Pushdown', cat:'strength', muscles:['Τρίκεφαλα'], icon:'🔱' },
+  { name:'Leg Press', cat:'strength', muscles:['Τετρακέφαλα'], icon:'🔄' },
+  { name:'Incline DB Press', cat:'strength', muscles:['Στήθος','Ώμοι'], icon:'📐' },
+  { name:'Treadmill Run', cat:'cardio', muscles:['Cardio'], icon:'🏃' },
+  { name:'Rowing Machine', cat:'cardio', muscles:['Full Body'], icon:'🚣' },
+  { name:'Jump Rope', cat:'cardio', muscles:['Cardio'], icon:'🪢' },
+  { name:'Hip Flexor Stretch', cat:'mobility', muscles:['Ισχία'], icon:'🧘' },
+  { name:'Foam Roll', cat:'mobility', muscles:['Recovery'], icon:'🔵' },
+  { name:'Hip Hinge', cat:'mobility', muscles:['Πλάτη','Ισχία'], icon:'🌊' },
+];
+
+let currentCat = 'all';
+let draggedEx = null;
+let dayCount = 3;
+
+function renderExercises(filter = '') {
+  const list = document.getElementById('exList');
+  const filtered = exercises.filter(e =>
+    (currentCat === 'all' || e.cat === currentCat) &&
+    e.name.toLowerCase().includes(filter.toLowerCase())
+  );
+  list.innerHTML = filtered.map(e => `
+    <div class="ex-card" draggable="true" ondragstart="startDrag(event,'${e.name}','${e.icon}')" onclick="quickAdd('${e.name}','${e.icon}')">
+      <div class="ex-thumb ${e.cat}">${e.icon}</div>
+      <div class="ex-info">
+        <div class="ex-name">${e.name}</div>
+        <div class="ex-tags">
+          <span class="ex-tag ${e.cat === 'strength' ? 's' : e.cat === 'cardio' ? 'c' : 'm'}">${e.cat}</span>
+          ${e.muscles.slice(0,2).map(m => `<span class="ex-tag mus">${m}</span>`).join('')}
+        </div>
+      </div>
+      <div class="add-ex-btn">+</div>
+    </div>
+  `).join('');
+}
+
+function filterExercises(val) { renderExercises(val); }
+function filterCat(el, cat) {
+  document.querySelectorAll('.fchip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentCat = cat;
+  renderExercises();
+}
+
+function startDrag(e, name, icon) {
+  draggedEx = { name, icon };
+  e.dataTransfer.effectAllowed = 'copy';
+}
+
+function dragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('dragover');
+}
+
+function dropEx(e, dayId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  if (draggedEx) addExerciseToDay(dayId, draggedEx.name, draggedEx.icon);
+}
+
+function addExToDay(dayId) {
+  const name = prompt('Όνομα άσκησης:');
+  if (name) addExerciseToDay(dayId, name, '🏋️');
+}
+
+function quickAdd(name, icon) {
+  addExerciseToDay('day1', name, icon);
+}
+
+function addExerciseToDay(dayId, name, icon) {
+  const day = document.getElementById(dayId);
+  const dropZone = day.querySelector('.drop-zone');
+  const ex = document.createElement('div');
+  ex.className = 'plan-ex';
+  ex.draggable = true;
+  ex.innerHTML = `
+    <div class="drag-handle">⠿</div>
+    <div class="pe-header" style="padding-left:16px">
+      <div class="pe-icon">${icon}</div>
+      <div class="pe-name">${name}</div>
+      <div class="pe-remove" onclick="removeEx(this)">✕</div>
+    </div>
+    <div class="pe-sets" style="padding-left:16px">
+      <div class="pe-input-wrap"><div class="pe-input-label">Σετ</div><input class="pe-input" value="3"></div>
+      <div class="pe-input-wrap"><div class="pe-input-label">Reps</div><input class="pe-input" value="10-12"></div>
+      <div class="pe-input-wrap"><div class="pe-input-label">Rest</div><input class="pe-input" value="60''"></div>
+    </div>`;
+  day.querySelector('.day-body').insertBefore(ex, dropZone);
+  updateCount();
+}
+
+function removeEx(btn) {
+  btn.closest('.plan-ex').remove();
+  updateCount();
+}
+
+function addDay() {
+  dayCount++;
+  const colors = ['linear-gradient(135deg,#f59e0b,#ef4444)','linear-gradient(135deg,#06b6d4,#3b82f6)','linear-gradient(135deg,#10b981,#6366f1)'];
+  const grid = document.getElementById('daysGrid');
+  const card = document.createElement('div');
+  card.className = 'day-card';
+  card.id = `day${dayCount}`;
+  card.innerHTML = `
+    <div class="day-card-header">
+      <div class="day-num" style="background:${colors[dayCount%3]}">${dayCount}</div>
+      <input class="day-name-input" value="Ημέρα ${dayCount}" placeholder="Όνομα ημέρας...">
+      <div class="day-more">⋮</div>
+    </div>
+    <div class="day-body">
+      <div class="drop-zone" onclick="addExToDay('day${dayCount}')" ondragover="dragOver(event)" ondrop="dropEx(event,'day${dayCount}')">
+        + Σύρε άσκηση εδώ ή πάτα για προσθήκη
+      </div>
+    </div>`;
+  grid.appendChild(card);
+  document.getElementById('totalDays').textContent = dayCount;
+}
+
+function updateCount() {
+  const total = document.querySelectorAll('.plan-ex').length;
+  document.getElementById('totalEx').textContent = total;
+}
+
+function savePlan() {
+  alert('Το πρόγραμμα αποθηκεύτηκε και στάλθηκε στον πελάτη! 🎉');
+}
+
+renderExercises();
+</script>
+
+<div id="floatingNav" style="position:fixed;bottom:20px;right:20px;z-index:9999;font-family:DM Sans,sans-serif">
+  <div id="navMenu" style="display:none;background:#0d1220;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:12px;margin-bottom:8px;min-width:210px;box-shadow:0 20px 60px rgba(0,0,0,.7)">
+    <div style="font-size:10px;font-family:Syne,sans-serif;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 6px">Athlisis Pages</div>
+    <style>.fnl a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#8892a4;font-size:12.5px;transition:background .15s,color .15s}.fnl a:hover{background:rgba(255,255,255,.06);color:#f0f4ff}</style>
+    <div class="fnl">
+      <a href="index.html">🌐 Landing Page</a>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="client-profile.html">👤 Client Profile</a>
+      <a href="meal-plan.html">🥗 AI Meal Plan</a>
+      <a href="appointments.html">📅 Appointments</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="messaging.html">💬 Messaging</a>
+      <a href="workout-builder.html">🏋️ Workout Builder</a>
+      <a href="pdf-report.html">📄 PDF Reports</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="billing.html">💳 Billing</a>
+      <a href="mobile.html">📱 Mobile App</a>
+      <a href="auth.html">🔐 Auth / Onboarding</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:10px 0"></div>
+    <a href="nav.html" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;text-decoration:none;color:#3b82f6;font-size:12.5px;font-weight:600">🗺️ All Pages</a>
+  </div>
+  <button onclick="var m=document.getElementById('navMenu');m.style.display=m.style.display==='none'?'block':'none'"
+    style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(59,130,246,.55);font-size:22px;color:white;margin-left:auto">⚡</button>
+</div>
+
+</body>
+</html>
